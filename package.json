@@ -2,7 +2,11 @@
   "name": "di",
   "version": "2.0.0-pre-14",
   "description": "A DI framework.",
-  "main": "node/index.js",
+  "main": "index",
+  "directories": {
+    "lib": "src"
+  },
+  "format": "es6"
   "homepage": "https://github.com/angular/di.js",
   "repository": {
     "type": "git",
