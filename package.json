@@ -6,7 +6,7 @@
   "directories": {
     "lib": "src"
   },
-  "format": "es6",
+  "format": "esm",
   "homepage": "https://github.com/angular/di.js",
   "repository": {
     "type": "git",
