@@ -26,7 +26,7 @@ class Inject {
 
 class InjectPromise extends Inject {
   constructor(...tokens) {
-    super(tokens);
+    super();
     this.tokens = tokens;
     this.isPromise = true;
     this.isLazy = false;
@@ -35,7 +35,7 @@ class InjectPromise extends Inject {
 
 class InjectLazy extends Inject {
   constructor(...tokens) {
-    super(tokens);
+    super();
     this.tokens = tokens;
     this.isPromise = false;
     this.isLazy = true;
@@ -51,7 +51,7 @@ class Provide {
 
 class ProvidePromise extends Provide {
   constructor(token) {
-    super(token);
+    super();
     this.token = token;
     this.isPromise = true;
   }
