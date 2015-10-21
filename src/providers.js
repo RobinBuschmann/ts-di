@@ -1,3 +1,4 @@
+/* */ 
 import {
   ClassProvider as ClassProviderAnnotation,
   FactoryProvider as FactoryProviderAnnotation,

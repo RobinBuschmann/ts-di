@@ -1,3 +1,4 @@
+/* */ 
 import {Injector} from './injector';
 import {Inject, annotate, readAnnotations} from './annotations';
 import {isFunction} from './util';

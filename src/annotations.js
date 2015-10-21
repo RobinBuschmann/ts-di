@@ -1,3 +1,4 @@
+/* */ 
 import {isFunction} from './util';
 
 // This module contains:
