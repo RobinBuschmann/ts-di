@@ -16,7 +16,9 @@ function isClass(clsOrFunction) {
   else if(hasAnnotation(clsOrFunction, FactoryProviderAnnotation)) {
     return false
   }
-  else if (clsOrFunction.name) {
+  /* When code is minified, class names are no longer upper case, so we skip this check
+   * if the name is oddly short (which happens during minification). */
+  else if (clsOrFunction.name && clsOrFunction.name.length && clsOrFunction.name.length > 3) {
     return isUpperCase(clsOrFunction.name.charAt(0));
   } else {
     return ownKeys(clsOrFunction.prototype).length > 0;
