@@ -1,6 +1,6 @@
 {
-  "name": "di",
-  "version": "1.0.0",
+  "name": "ts-di",
+  "version": "1.0.1",
   "description": "A DI framework, fork from angular/di.js",
   "main": "node/index.js",
   "directories": {
