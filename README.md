@@ -2,8 +2,14 @@
 
 This fork - it's just version TypeScript [Angular DI](https://github.com/angular/di.js) without tests, examples and documentation.
 
-### Transpiling ES6
+### Transpiling
 
-```ts
+```bash
 tsc
+```
+
+### Install
+
+```bash
+npm install ts-di --save
 ```
