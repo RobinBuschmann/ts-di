@@ -20,25 +20,30 @@ else if (typeof location === 'object' && location.search)
 
 
 var globalCounter = 0;
-function getUniqueId() {
+function getUniqueId()
+{
   return ++globalCounter;
 }
 
 
-function serializeToken(token, tokens) {
-  if (!tokens.has(token)) {
+function serializeToken(token, tokens)
+{
+  if (!tokens.has(token))
+  {
     tokens.set(token, getUniqueId().toString());
   }
 
   return tokens.get(token);
 }
 
-function serializeProvider(provider, key, tokens) {
+function serializeProvider(provider, key, tokens)
+{
   return {
     id: serializeToken(key, tokens),
     name: toString(key),
     isPromise: provider.isPromise,
-    dependencies: provider.params.map(function(param) {
+    dependencies: provider.params.map(function(param)
+    {
       return {
         token: serializeToken(param.token, tokens),
         isPromise: param.isPromise,
@@ -49,22 +54,26 @@ function serializeProvider(provider, key, tokens) {
 }
 
 
-function serializeInjector(injector, tokens, Injector) {
-  var serializedInjector = {
+function serializeInjector(injector, tokens, Injector)
+{
+  var serializedInjector =
+  {
     id: serializeToken(injector, tokens),
     parent_id: injector._parent ? serializeToken(injector._parent, tokens) : null,
     providers: {}
   };
 
   var injectorClassId = serializeToken(Injector, tokens);
-  serializedInjector.providers[injectorClassId] = {
+  serializedInjector.providers[injectorClassId] =
+  {
     id: injectorClassId,
     name: toString(Injector),
     isPromise: false,
     dependencies: []
   };
 
-  injector._providers.forEach(function(provider, key) {
+  injector._providers.forEach(function(provider, key)
+  {
     var serializedProvider = serializeProvider(provider, key, tokens);
     serializedInjector.providers[serializedProvider.id] = serializedProvider;
   });
@@ -73,13 +82,17 @@ function serializeInjector(injector, tokens, Injector) {
 }
 
 
-export function profileInjector(injector, Injector) {
-  if (!IS_DEBUG) {
+export function profileInjector(injector, Injector)
+{
+  if (!IS_DEBUG)
+  {
     return;
   }
 
-  if (!_global.__di_dump__) {
-    _global.__di_dump__ = {
+  if (!_global.__di_dump__)
+  {
+    _global.__di_dump__ =
+    {
       injectors: [],
       tokens: new Map()
     };

@@ -8,19 +8,25 @@ import {
 } from './annotations';
 import {isFunction, isObject, toString, isUpperCase, ownKeys} from './util';
 
-function isClass(clsOrFunction) {
+function isClass(clsOrFunction)
+{
 
-  if (hasAnnotation(clsOrFunction, ClassProviderAnnotation)) {
+  if (hasAnnotation(clsOrFunction, ClassProviderAnnotation))
+  {
     return true
   } 
-  else if(hasAnnotation(clsOrFunction, FactoryProviderAnnotation)) {
+  else if(hasAnnotation(clsOrFunction, FactoryProviderAnnotation))
+  {
     return false
   }
   /* When code is minified, class names are no longer upper case, so we skip this check
    * if the name is oddly short (which happens during minification). */
-  else if (clsOrFunction.name && clsOrFunction.name.length && clsOrFunction.name.length > 3) {
+  else if (clsOrFunction.name && clsOrFunction.name.length && clsOrFunction.name.length > 3)
+  {
     return isUpperCase(clsOrFunction.name.charAt(0));
-  } else {
+  }
+  else
+  {
     return ownKeys(clsOrFunction.prototype).length > 0;
   }
 }
@@ -76,15 +82,19 @@ class ClassProvider
   // This function mutates `this.params` and `this._constructors`,
   // but it is only called during the constructor.
   // TODO(vojta): remove the annotations argument?
-  _flattenParams(constructor, params) {
+  _flattenParams(constructor, params)
+  {
     var SuperConstructor;
     var constructorInfo;
 
-    for (var param of params) {
-      if (param.token === SuperConstructorAnnotation) {
+    for (var param of params)
+    {
+      if (param.token === SuperConstructorAnnotation)
+      {
         SuperConstructor = Object.getPrototypeOf(constructor);
 
-        if (SuperConstructor === EmptyFunction) {
+        if (SuperConstructor === EmptyFunction)
+        {
           throw new Error(`${toString(constructor)} does not have a parent constructor. Only classes with a parent can ask for SuperConstructor!`);
         }
 
@@ -92,7 +102,9 @@ class ClassProvider
         this._constructors.push(constructorInfo);
         this._flattenParams(SuperConstructor, readAnnotations(SuperConstructor).params);
         constructorInfo.push(this.params.length - 1);
-      } else {
+      }
+      else
+      {
         this.params.push(param);
       }
     }
@@ -101,33 +113,40 @@ class ClassProvider
   // Basically the reverse process to `this._flattenParams`:
   // We get arguments for all the constructors as a single flat array.
   // This method generates pre-bound "superConstructor" wrapper with correctly passing arguments.
-  _createConstructor(currentConstructorIdx, context, allArguments) {
+  _createConstructor(currentConstructorIdx, context, allArguments)
+  {
     var constructorInfo = this._constructors[currentConstructorIdx];
     var nextConstructorInfo = this._constructors[currentConstructorIdx + 1];
     var argsForCurrentConstructor;
 
-    if (nextConstructorInfo) {
+    if (nextConstructorInfo)
+    {
       argsForCurrentConstructor = allArguments
           .slice(constructorInfo[1], nextConstructorInfo[1])
           .concat([this._createConstructor(currentConstructorIdx + 1, context, allArguments)])
           .concat(allArguments.slice(nextConstructorInfo[2] + 1, constructorInfo[2] + 1));
-    } else {
+    }
+    else
+    {
       argsForCurrentConstructor = allArguments.slice(constructorInfo[1], constructorInfo[2] + 1);
     }
 
-    return function InjectedAndBoundSuperConstructor() {
+    return function InjectedAndBoundSuperConstructor()
+    {
       // TODO(vojta): throw if arguments given
       return new constructorInfo[0](...argsForCurrentConstructor);
     };
   }
 
   // It is called by injector to create an instance.
-  create(args) {
+  create(args)
+  {
     var context = Object.create(this.provider.prototype);
     var constructor = this._createConstructor(0, context, args);
     var returnedValue = constructor();
 
-    if (isFunction(returnedValue) || isObject(returnedValue)) {
+    if (isFunction(returnedValue) || isObject(returnedValue))
+    {
       return returnedValue;
     }
 

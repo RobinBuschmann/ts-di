@@ -1,22 +1,23 @@
 {
   "name": "ts-di",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A DI framework, fork from angular/di.js",
   "main": "node/index.js",
   "directories": {
     "lib": "src"
   },
   "format": "es2015",
-  "homepage": "https://github.com/KostyaTretyak/di.js",
+  "homepage": "https://github.com/KostyaTretyak/ts-di.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/KostyaTretyak/di.js.git"
+    "url": "git://github.com/KostyaTretyak/ts-di.js.git"
   },
   "bugs": {
-    "url": "https://github.com/KostyaTretyak/di.js/issues"
+    "url": "https://github.com/KostyaTretyak/ts-di.js/issues"
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/jasmine": "^2.5.38",
     "@types/node": "^6.0.52",
     "typescript": "^2.1.4"
   },

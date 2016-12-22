@@ -1,29 +1,36 @@
 // A bunch of helper functions.
 
-function isUpperCase(char) {
+function isUpperCase(char)
+{
   return char.toUpperCase() === char;
 }
 
-function isFunction(value) {
+function isFunction(value)
+{
   return typeof value === 'function';
 }
 
 
-function isObject(value) {
+function isObject(value)
+{
   return typeof value === 'object';
 }
 
 
-function toString(token) {
-  if (typeof token === 'string') {
+function toString(token)
+{
+  if (typeof token === 'string')
+  {
     return token;
   }
 
-  if (token === undefined || token === null) {
+  if (token === undefined || token === null)
+  {
     return '' + token;
   }
 
-  if (token.name) {
+  if (token.name)
+  {
     return token.name;
   }
 

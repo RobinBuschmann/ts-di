@@ -192,7 +192,8 @@ class Injector
 
           for (var i = 0; i < args.length; i += 2)
           {
-            locals.push((function(ii) {
+            locals.push((function(ii)
+            {
               var fn = function createLocalInstance()
               {
                 return args[ii + 1];
@@ -212,16 +213,19 @@ class Injector
     }
 
     // Check if there is a cached instance already.
-    if (this._cache.has(token)) {
+    if (this._cache.has(token))
+    {
       instance = this._cache.get(token);
       provider = this._providers.get(token);
 
-      if (provider.isPromise && !wantPromise) {
+      if (provider.isPromise && !wantPromise)
+      {
         resolvingMsg = constructResolvingMessage(resolving, token);
         throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
       }
 
-      if (!provider.isPromise && wantPromise) {
+      if (!provider.isPromise && wantPromise)
+      {
         return Promise.resolve(instance);
       }
 
@@ -231,13 +235,16 @@ class Injector
     provider = this._providers.get(token);
 
     // No provider defined (overridden), use the default provider (token).
-    if (!provider && isFunction(token) && !this._hasProviderFor(token)) {
+    if (!provider && isFunction(token) && !this._hasProviderFor(token))
+    {
       provider = createProviderFromFnOrClass(token, readAnnotations(token));
       return this._instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy);
     }
 
-    if (!provider) {
-      if (!this._parent) {
+    if (!provider)
+    {
+      if (!this._parent)
+      {
         resolvingMsg = constructResolvingMessage(resolving, token);
         throw new Error(`No provider for ${toString(token)}!${resolvingMsg}`);
       }
@@ -245,7 +252,8 @@ class Injector
       return this._parent.get(token, resolving, wantPromise, wantLazy);
     }
 
-    if (resolving.indexOf(token) !== -1) {
+    if (resolving.indexOf(token) !== -1)
+    {
       resolvingMsg = constructResolvingMessage(resolving, token);
       throw new Error(`Cannot instantiate cyclic dependency!${resolvingMsg}`);
     }

@@ -1,3 +1,6 @@
+/* */ 
+import {isFunction} from './util';
+
 // ******************************* Type Definitions start
 
 class Annotations
@@ -23,9 +26,6 @@ interface Fn
 }
 
 // ******************************* Type Definitions end
-
-/* */ 
-import {isFunction} from './util';
 
 // This module contains:
 // - built-in annotation classes
