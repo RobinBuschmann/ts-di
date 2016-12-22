@@ -11,14 +11,17 @@ import {profileInjector} from './profiler';
 import {createProviderFromFnOrClass} from './providers';
 
 
-function constructResolvingMessage(resolving, token) {
+function constructResolvingMessage(resolving, token?)
+{
   // If a token is passed in, add it into the resolving array.
   // We need to check arguments.length because it can be null/undefined.
-  if (arguments.length > 1) {
+  if (arguments.length > 1)
+  {
     resolving.push(token);
   }
 
-  if (resolving.length > 1) {
+  if (resolving.length > 1)
+  {
     return ` (${resolving.map(toString).join(' -> ')})`;
   }
 
@@ -38,9 +41,15 @@ function constructResolvingMessage(resolving, token) {
 // - dealing with isPromise
 // - dealing with isLazy
 // - loading different "providers" and modules
-class Injector {
+class Injector
+{
+  _cache;
+  _providers;
+  _parent;
+  _scopes;
 
-  constructor(modules = [], parentInjector = null, providers = new Map(), scopes = []) {
+  constructor(modules = [], parentInjector = null, providers = new Map(), scopes = [])
+  {
     this._cache = new Map();
     this._providers = providers;
     this._parent = parentInjector;
@@ -54,14 +63,18 @@ class Injector {
 
   // Collect all registered providers that has given annotation.
   // Including providers defined in parent injectors.
-  _collectProvidersWithAnnotation(annotationClass, collectedProviders) {
-    this._providers.forEach((provider, token) => {
-      if (!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass)) {
+  _collectProvidersWithAnnotation(annotationClass, collectedProviders)
+  {
+    this._providers.forEach((provider, token) =>
+    {
+      if (!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass))
+      {
         collectedProviders.set(token, provider);
       }
     });
 
-    if (this._parent) {
+    if (this._parent)
+    {
       this._parent._collectProvidersWithAnnotation(annotationClass, collectedProviders);
     }
   }
@@ -69,10 +82,13 @@ class Injector {
 
   // Load modules/function/classes.
   // This mutates `this._providers`, but it is only called during the constructor.
-  _loadModules(modules) {
-    for (var module of modules) {
+  _loadModules(modules)
+  {
+    for (var module of modules)
+    {
       // A single provider (class or function).
-      if (isFunction(module)) {
+      if (isFunction(module))
+      {
         this._loadFnOrClass(module);
         continue;
       }
@@ -84,7 +100,8 @@ class Injector {
 
   // Load a function or class.
   // This mutates `this._providers`, but it is only called during the constructor.
-  _loadFnOrClass(fnOrClass) {
+  _loadFnOrClass(fnOrClass)
+  {
     // TODO(vojta): should we expose provider.token?
     var annotations = readAnnotations(fnOrClass);
     var token = annotations.provide.token || fnOrClass;
@@ -96,12 +113,15 @@ class Injector {
 
   // Returns true if there is any provider registered for given token.
   // Including parent injectors.
-  _hasProviderFor(token) {
-    if (this._providers.has(token)) {
+  _hasProviderFor(token)
+  {
+    if (this._providers.has(token))
+    {
       return true;
     }
 
-    if (this._parent) {
+    if (this._parent)
+    {
       return this._parent._hasProviderFor(token);
     }
 
@@ -109,16 +129,20 @@ class Injector {
   }
 
   // Find the correct injector where the default provider should be instantiated and cached.
-  _instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy) {
+  _instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy)
+  {
     // In root injector, instantiate here.
-    if (!this._parent) {
+    if (!this._parent)
+    {
       this._providers.set(token, provider);
       return this.get(token, resolving, wantPromise, wantLazy);
     }
 
     // Check if this injector forces new instance of this provider.
-    for (var ScopeClass of this._scopes) {
-      if (hasAnnotation(provider.provider, ScopeClass)) {
+    for (var ScopeClass of this._scopes)
+    {
+      if (hasAnnotation(provider.provider, ScopeClass))
+      {
         this._providers.set(token, provider);
         return this.get(token, resolving, wantPromise, wantLazy);
       }
@@ -130,20 +154,24 @@ class Injector {
 
 
   // Return an instance for given token.
-  get(token, resolving = [], wantPromise = false, wantLazy = false) {
+  get(token, resolving = [], wantPromise = false, wantLazy = false)
+  {
     var resolvingMsg = '';
     var provider;
     var instance;
-    var injector = this;
+    var injector: Injector = this;
 
-    if (token === null || token === undefined) {
+    if (token === null || token === undefined)
+    {
       resolvingMsg = constructResolvingMessage(resolving, token);
       throw new Error(`Invalid token "${token}" requested!${resolvingMsg}`);
     }
 
     // Special case, return itself.
-    if (token === Injector) {
-      if (wantPromise) {
+    if (token === Injector)
+    {
+      if (wantPromise)
+      {
         return Promise.resolve(this);
       }
 
@@ -151,17 +179,22 @@ class Injector {
     }
 
     // TODO(vojta): optimize - no child injector for locals?
-    if (wantLazy) {
-      return function createLazyInstance() {
+    if (wantLazy)
+    {
+      return function createLazyInstance()
+      {
         var lazyInjector = injector;
 
-        if (arguments.length) {
+        if (arguments.length)
+        {
           var locals = [];
           var args = arguments;
 
-          for (var i = 0; i < args.length; i += 2) {
+          for (var i = 0; i < args.length; i += 2)
+          {
             locals.push((function(ii) {
-              var fn = function createLocalInstance() {
+              var fn = function createLocalInstance()
+              {
                 return args[ii + 1];
               };
 
@@ -227,10 +260,11 @@ class Injector {
     // - requested as promise (delayed)
     // - requested again sync (before the previous gets resolved)
     // -> error, but let it go inside to throw where exactly is the async provider
-    var delayingInstantiation = wantPromise && provider.params.some((param) => !param.isPromise);
-    var args = provider.params.map((param) => {
-
-      if (delayingInstantiation) {
+    var delayingInstantiation = wantPromise && provider.params.some( param => !param.isPromise);
+    var args = provider.params.map( param =>
+    {
+      if (delayingInstantiation)
+      {
         return this.get(param.token, resolving, true, param.isLazy);
       }
 
@@ -238,23 +272,29 @@ class Injector {
     });
 
     // Delaying the instantiation - return a promise.
-    if (delayingInstantiation) {
+    if (delayingInstantiation)
+    {
       var delayedResolving = resolving.slice(); // clone
 
       resolving.pop();
 
       // Once all dependencies (promises) are resolved, instantiate.
-      return Promise.all(args).then(function(args) {
-        try {
+      return Promise.all(args).then(function(args)
+      {
+        try
+        {
           instance = provider.create(args);
-        } catch (e) {
+        }
+        catch (e)
+        {
           resolvingMsg = constructResolvingMessage(delayedResolving);
           var originalMsg = 'ORIGINAL ERROR: ' + e.message;
           e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
           throw e;
         }
 
-        if (!hasAnnotation(provider.provider, TransientScopeAnnotation)) {
+        if (!hasAnnotation(provider.provider, TransientScopeAnnotation))
+        {
           injector._cache.set(token, instance);
         }
 
@@ -267,26 +307,32 @@ class Injector {
       });
     }
 
-    try {
+    try
+    {
       instance = provider.create(args);
-    } catch (e) {
+    }
+    catch (e)
+    {
       resolvingMsg = constructResolvingMessage(resolving);
       var originalMsg = 'ORIGINAL ERROR: ' + e.message;
       e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
       throw e;
     }
 
-    if (!hasAnnotation(provider.provider, TransientScopeAnnotation)) {
+    if (!hasAnnotation(provider.provider, TransientScopeAnnotation))
+    {
       this._cache.set(token, instance);
     }
 
-    if (!wantPromise && provider.isPromise) {
+    if (!wantPromise && provider.isPromise)
+    {
       resolvingMsg = constructResolvingMessage(resolving);
 
       throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
     }
 
-    if (wantPromise && !provider.isPromise) {
+    if (wantPromise && !provider.isPromise)
+    {
       instance = Promise.resolve(instance);
     }
 
@@ -296,20 +342,23 @@ class Injector {
   }
 
 
-  getPromise(token) {
+  getPromise(token)
+  {
     return this.get(token, [], true);
   }
 
 
   // Create a child injector, which encapsulate shorter life scope.
   // It is possible to add additional providers and also force new instances of existing providers.
-  createChild(modules = [], forceNewInstancesOf = []) {
+  createChild(modules = [], forceNewInstancesOf = [])
+  {
     var forcedProviders = new Map();
 
     // Always force new instance of TransientScope.
     forceNewInstancesOf.push(TransientScopeAnnotation);
 
-    for (var annotation of forceNewInstancesOf) {
+    for (var annotation of forceNewInstancesOf)
+    {
       this._collectProvidersWithAnnotation(annotation, forcedProviders);
     }
 

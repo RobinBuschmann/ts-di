@@ -1,3 +1,29 @@
+// ******************************* Type Definitions start
+
+class Annotations
+{
+  isPromise: boolean;
+  token: any;
+
+  [Symbol.iterator] = function* ()
+  {
+    let properties = Object.keys(this);
+    
+    for (let i of properties)
+    {
+      yield this[i];
+    }
+  }  
+}
+
+interface Fn
+{
+  annotations: Annotations;
+  parameters: any;
+}
+
+// ******************************* Type Definitions end
+
 /* */ 
 import {isFunction} from './util';
 
@@ -17,16 +43,24 @@ class SuperConstructor {}
 // Never cache.
 class TransientScope {}
 
-class Inject {
-  constructor(...tokens) {
+class Inject
+{
+  tokens;
+  isPromise;
+  isLazy;
+
+  constructor(...tokens)
+  {
     this.tokens = tokens;
     this.isPromise = false;
     this.isLazy = false;
   }
 }
 
-class InjectPromise extends Inject {
-  constructor(...tokens) {
+class InjectPromise extends Inject
+{
+  constructor(...tokens)
+  {
     super();
     this.tokens = tokens;
     this.isPromise = true;
@@ -34,8 +68,10 @@ class InjectPromise extends Inject {
   }
 }
 
-class InjectLazy extends Inject {
-  constructor(...tokens) {
+class InjectLazy extends Inject
+{
+  constructor(...tokens)
+  {
     super();
     this.tokens = tokens;
     this.isPromise = false;
@@ -43,15 +79,25 @@ class InjectLazy extends Inject {
   }
 }
 
-class Provide {
-  constructor(token) {
+class Provide
+{
+  token;
+  isPromise;
+
+  constructor(...token)
+  {
     this.token = token;
     this.isPromise = false;
   }
 }
 
-class ProvidePromise extends Provide {
-  constructor(token) {
+class ProvidePromise extends Provide
+{
+  token;
+  isPromise;
+
+  constructor(...token)
+  {
     super();
     this.token = token;
     this.isPromise = true;
@@ -66,20 +112,25 @@ class FactoryProvider {}
 
 // Append annotation on a function or class.
 // This can be helpful when not using ES6+.
-function annotate(fn, annotation) {
+function annotate(fn, annotation)
+{
   fn.annotations = fn.annotations || [];
   fn.annotations.push(annotation);
 }
 
 
 // Read annotations on a function or class and return whether given annotation is present.
-function hasAnnotation(fn, annotationClass) {
-  if (!fn.annotations || fn.annotations.length === 0) {
+function hasAnnotation(fn, annotationClass)
+{
+  if (!fn.annotations || fn.annotations.length === 0)
+  {
     return false;
   }
 
-  for (var annotation of fn.annotations) {
-    if (annotation instanceof annotationClass) {
+  for (var annotation of fn.annotations)
+  {
+    if (annotation instanceof annotationClass)
+    {
       return true;
     }
   }
@@ -89,8 +140,10 @@ function hasAnnotation(fn, annotationClass) {
 
 
 // Read annotations on a function or class and collect "interesting" metadata:
-function readAnnotations(fn) {
-  var collectedAnnotations = {
+function readAnnotations(fn: Fn)
+{
+  var collectedAnnotations =
+  {
     // Description of the provided value.
     provide: {
       token: null,
@@ -105,10 +158,14 @@ function readAnnotations(fn) {
     params: []
   };
 
-  if (fn.annotations && fn.annotations.length) {
-    for (var annotation of fn.annotations) {
-      if (annotation instanceof Inject) {
-        annotation.tokens.forEach((token) => {
+  if (fn.annotations && (typeof fn.annotations === 'object'))
+  {
+    for (var annotation of fn.annotations)
+    {
+      if (annotation instanceof Inject)
+      {
+        annotation.tokens.forEach((token) =>
+        {
           collectedAnnotations.params.push({
             token: token,
             isPromise: annotation.isPromise,
@@ -117,7 +174,8 @@ function readAnnotations(fn) {
         });
       }
 
-      if (annotation instanceof Provide) {
+      if (annotation instanceof Provide)
+      {
         collectedAnnotations.provide.token = annotation.token;
         collectedAnnotations.provide.isPromise = annotation.isPromise;
       }
@@ -125,18 +183,26 @@ function readAnnotations(fn) {
   }
 
   // Read annotations for individual parameters.
-  if (fn.parameters) {
-    fn.parameters.forEach((param, idx) => {
-      for (var paramAnnotation of param) {
+  if (fn.parameters)
+  {
+    fn.parameters.forEach((param, idx) =>
+    {
+      for (var paramAnnotation of param)
+      {
         // Type annotation.
-        if (isFunction(paramAnnotation) && !collectedAnnotations.params[idx]) {
-          collectedAnnotations.params[idx] = {
+        if (isFunction(paramAnnotation) && !collectedAnnotations.params[idx])
+        {
+          collectedAnnotations.params[idx] =
+          {
             token: paramAnnotation,
             isPromise: false,
             isLazy: false
           };
-        } else if (paramAnnotation instanceof Inject) {
-          collectedAnnotations.params[idx] = {
+        }
+        else if (paramAnnotation instanceof Inject)
+        {
+          collectedAnnotations.params[idx] =
+          {
             token: paramAnnotation.tokens[0],
             isPromise: paramAnnotation.isPromise,
             isLazy: paramAnnotation.isLazy
@@ -150,43 +216,48 @@ function readAnnotations(fn) {
 }
 
 // Decorator versions of annotation classes
-function inject(...tokens) {
-  return function(fn) {
+function inject(...tokens)
+{
+  return function(fn)
+  {
     annotate(fn, new Inject(...tokens));
   };
 }
 
-function inject(...tokens) {
-  return function(fn) {
-    annotate(fn, new Inject(...tokens));
-  };
-}
-
-function injectPromise(...tokens) {
-  return function(fn) {
+function injectPromise(...tokens)
+{
+  return function(fn)
+  {
     annotate(fn, new InjectPromise(...tokens));
   };
 }
 
-function injectLazy(...tokens) {
-  return function(fn) {
+function injectLazy(...tokens)
+{
+  return function(fn)
+  {
     annotate(fn, new InjectLazy(...tokens));
   };
 }
 
-function provide(...tokens) {
-  return function(fn) {
+function provide(...tokens)
+{
+  return function(fn)
+  {
     annotate(fn, new Provide(...tokens));
   };
 }
 
-function providePromise(...tokens) {
-  return function(fn) {
+function providePromise(...tokens)
+{
+  return function(fn)
+  {
     annotate(fn, new ProvidePromise(...tokens));
   };
 }
 
-export {
+export
+{
   annotate,
   hasAnnotation,
   readAnnotations,

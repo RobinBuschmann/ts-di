@@ -49,8 +49,15 @@ var EmptyFunction = Object.getPrototypeOf(Function);
 // - all the state is immutable (constructed)
 //
 // TODO(vojta): super constructor - should be only allowed during the constructor call?
-class ClassProvider {
-  constructor(clazz, params, isPromise) {
+class ClassProvider
+{
+  provider;
+  isPromise;
+  params;
+  _constructors;
+
+  constructor(clazz, params, isPromise)
+  {
     // TODO(vojta): can we hide this.provider? (only used for hasAnnotation(provider.provider))
     this.provider = clazz;
     this.isPromise = isPromise;
@@ -110,7 +117,7 @@ class ClassProvider {
 
     return function InjectedAndBoundSuperConstructor() {
       // TODO(vojta): throw if arguments given
-      return constructorInfo[0].apply(context, argsForCurrentConstructor);
+      return new constructorInfo[0](...argsForCurrentConstructor);
     };
   }
 
@@ -131,27 +138,38 @@ class ClassProvider {
 
 // FactoryProvider knows how to create instance from a factory function.
 // - all the state is immutable
-class FactoryProvider {
-  constructor(factoryFunction, params, isPromise) {
+class FactoryProvider
+{
+  provider;
+  params;
+  isPromise;
+
+  constructor(factoryFunction, params, isPromise)
+  {
     this.provider = factoryFunction;
     this.params = params;
     this.isPromise = isPromise;
 
-    for (var param of params) {
-      if (param.token === SuperConstructorAnnotation) {
+    for (var param of params)
+    {
+      if (param.token === SuperConstructorAnnotation)
+      {
         throw new Error(`${toString(factoryFunction)} is not a class. Only classes with a parent can ask for SuperConstructor!`);
       }
     }
   }
 
-  create(args) {
+  create(args)
+  {
     return this.provider.apply(undefined, args);
   }
 }
 
 
-export function createProviderFromFnOrClass(fnOrClass, annotations) {
-  if (isClass(fnOrClass)) {
+export function createProviderFromFnOrClass(fnOrClass, annotations)
+{
+  if (isClass(fnOrClass))
+  {
     return new ClassProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
   }
 

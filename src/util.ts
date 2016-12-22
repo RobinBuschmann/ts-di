@@ -30,11 +30,20 @@ function toString(token) {
   return token.toString();
 }
 
-var ownKeys = (this && this.Reflect && Reflect.ownKeys ? Reflect.ownKeys : function ownKeys(O) {
-  var keys = Object.getOwnPropertyNames(O);
-  if (Object.getOwnPropertySymbols) return keys.concat(Object.getOwnPropertySymbols(O));
-  return keys;
-});
+var ownKeys =
+(
+  this
+  && this.Reflect
+  && Reflect.ownKeys ? Reflect.ownKeys : function ownKeys(O)
+  {
+    var keys = Object.getOwnPropertyNames(O);
+
+    if ( Object.getOwnPropertySymbols )
+      return keys.concat( Object.getOwnPropertySymbols(O) );
+    
+    return keys;
+  }
+);
 
 
 export {

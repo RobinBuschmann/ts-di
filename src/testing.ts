@@ -27,15 +27,18 @@ function use(mock) {
   }
 
   var providerWrapper = {
-    provider: mock
+    provider: mock,
+    as: ''
   };
 
   var fn = function() {
     currentSpec.$$providers.push(providerWrapper);
   };
 
-  fn.as = function(token) {
-    if (currentSpec && currentSpec.$$injector) {
+  fn['as'] = function(token)
+  {
+    if (currentSpec && currentSpec.$$injector)
+    {
       throw new Error('Cannot call as() after inject() has already been called.');
     }
 
