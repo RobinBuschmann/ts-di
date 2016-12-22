@@ -157,7 +157,7 @@ class ClassProvider
 
 // FactoryProvider knows how to create instance from a factory function.
 // - all the state is immutable
-class FactoryProvider
+export class FactoryProvider
 {
   provider;
   params;

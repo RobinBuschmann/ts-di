@@ -46,7 +46,7 @@ var ownKeys =
     var keys = Object.getOwnPropertyNames(O);
 
     if ( Object.getOwnPropertySymbols )
-      return keys.concat( Object.getOwnPropertySymbols(O) );
+      return keys.concat( Object.getOwnPropertySymbols(O).toString() );
     
     return keys;
   }

@@ -3,7 +3,7 @@ import {isFunction} from './util';
 
 // ******************************* Type Definitions start
 
-class Annotations
+export class Annotations
 {
   isPromise: boolean;
   token: any;
@@ -19,7 +19,7 @@ class Annotations
   }  
 }
 
-interface Fn
+export interface Fn
 {
   annotations: Annotations;
   parameters: any;

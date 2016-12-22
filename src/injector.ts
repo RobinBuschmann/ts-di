@@ -11,7 +11,7 @@ import {profileInjector} from './profiler';
 import {createProviderFromFnOrClass} from './providers';
 
 
-function constructResolvingMessage(resolving, token?)
+export function constructResolvingMessage(resolving, token?)
 {
   // If a token is passed in, add it into the resolving array.
   // We need to check arguments.length because it can be null/undefined.
@@ -41,7 +41,7 @@ function constructResolvingMessage(resolving, token?)
 // - dealing with isPromise
 // - dealing with isLazy
 // - loading different "providers" and modules
-class Injector
+export class Injector
 {
   _cache;
   _providers;
@@ -373,6 +373,3 @@ class Injector
     return new Injector(modules, this, forcedProviders, forceNewInstancesOf);
   }
 }
-
-
-export {Injector};
