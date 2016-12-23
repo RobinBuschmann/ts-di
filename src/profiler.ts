@@ -1,4 +1,3 @@
-/* */ 
 import {toString} from './util';
 
 

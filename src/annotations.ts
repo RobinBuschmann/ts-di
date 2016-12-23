@@ -1,4 +1,3 @@
-/* */ 
 import {isFunction} from './util';
 
 // ******************************* Type Definitions start
