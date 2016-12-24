@@ -1,8 +1,9 @@
 import {toString} from './util';
+import {Injector} from './injector';
 
 
-var IS_DEBUG = false;
-var _global = null;
+let IS_DEBUG = false;
+let _global: any = null;
 
 if (typeof process === 'object' && process.env)
 {
@@ -18,14 +19,14 @@ else if (typeof location === 'object' && location.search)
 }
 
 
-var globalCounter = 0;
+let globalCounter = 0;
 function getUniqueId()
 {
   return ++globalCounter;
 }
 
 
-function serializeToken(token, tokens)
+function serializeToken(token: any, tokens: any)
 {
   if (!tokens.has(token))
   {
@@ -35,13 +36,13 @@ function serializeToken(token, tokens)
   return tokens.get(token);
 }
 
-function serializeProvider(provider, key, tokens)
+function serializeProvider(provider: any, key: string, tokens: any)
 {
   return {
     id: serializeToken(key, tokens),
     name: toString(key),
     isPromise: provider.isPromise,
-    dependencies: provider.params.map(function(param)
+    dependencies: provider.params.map( (param: any) =>
     {
       return {
         token: serializeToken(param.token, tokens),
@@ -53,16 +54,16 @@ function serializeProvider(provider, key, tokens)
 }
 
 
-function serializeInjector(injector, tokens, Injector)
+function serializeInjector(injector: any, tokens: any, Injector: Injector)
 {
-  var serializedInjector =
+  let serializedInjector: any =
   {
     id: serializeToken(injector, tokens),
     parent_id: injector._parent ? serializeToken(injector._parent, tokens) : null,
     providers: {}
   };
 
-  var injectorClassId = serializeToken(Injector, tokens);
+  let injectorClassId = serializeToken(Injector, tokens);
   serializedInjector.providers[injectorClassId] =
   {
     id: injectorClassId,
@@ -71,9 +72,9 @@ function serializeInjector(injector, tokens, Injector)
     dependencies: []
   };
 
-  injector._providers.forEach(function(provider, key)
+  injector._providers.forEach(function(provider: any, key: string)
   {
-    var serializedProvider = serializeProvider(provider, key, tokens);
+    let serializedProvider = serializeProvider(provider, key, tokens);
     serializedInjector.providers[serializedProvider.id] = serializedProvider;
   });
 
@@ -81,7 +82,7 @@ function serializeInjector(injector, tokens, Injector)
 }
 
 
-export function profileInjector(injector, Injector)
+export function profileInjector(injector: Injector, Injector: any)
 {
   if (!IS_DEBUG)
   {

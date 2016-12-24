@@ -7,7 +7,7 @@ import {
 } from './annotations';
 import {isFunction, isObject, toString, isUpperCase, ownKeys} from './util';
 
-function isClass(clsOrFunction)
+function isClass(clsOrFunction: any)
 {
 
   if (hasAnnotation(clsOrFunction, ClassProviderAnnotation))
@@ -45,25 +45,26 @@ function isClass(clsOrFunction)
 
 var EmptyFunction = Object.getPrototypeOf(Function);
 
-
-// ClassProvider knows how to instantiate classes.
-//
-// If a class inherits (has parent constructors), this provider normalizes all the dependencies
-// into a single flat array first, so that the injector does not need to worry about inheritance.
-//
-// - all the state is immutable (constructed)
-//
-// TODO(vojta): super constructor - should be only allowed during the constructor call?
+/**
+* It knows how to instantiate classes.
+*
+* If a class inherits (has parent constructors), this provider normalizes all the dependencies
+* into a single flat array first, so that the injector does not need to worry about inheritance.
+*
+* - all the state is immutable (constructed)
+*
+* @todo(vojta): super constructor - should be only allowed during the constructor call?
+*/
 class ClassProvider
 {
-  provider;
-  isPromise;
-  params;
-  _constructors;
+  provider: any;
+  isPromise: boolean;
+  params: any[];
+  _constructors: any[];
 
-  constructor(clazz, params, isPromise)
+  constructor(clazz: any, params: any, isPromise: boolean)
   {
-    // TODO(vojta): can we hide this.provider? (only used for hasAnnotation(provider.provider))
+    // @todo(vojta): can we hide this.provider? (only used for hasAnnotation(provider.provider))
     this.provider = clazz;
     this.isPromise = isPromise;
 
@@ -73,15 +74,16 @@ class ClassProvider
     this._flattenParams(clazz, params);
     this._constructors.unshift([clazz, 0, this.params.length - 1]);
   }
-
-  // Normalize params for all the constructors (in the case of inheritance),
-  // into a single flat array of DependencyDescriptors.
-  // So that the injector does not have to worry about inheritance.
-  //
-  // This function mutates `this.params` and `this._constructors`,
-  // but it is only called during the constructor.
-  // TODO(vojta): remove the annotations argument?
-  _flattenParams(constructor, params)
+  /**
+  * Normalize params for all the constructors (in the case of inheritance),
+  * into a single flat array of DependencyDescriptors.
+  * So that the injector does not have to worry about inheritance.
+  *
+  * This function mutates `this.params` and `this._constructors`,
+  * but it is only called during the constructor.
+  * @todo(vojta): remove the annotations argument?
+  */
+  _flattenParams(constructor: any, params: any)
   {
     var SuperConstructor;
     var constructorInfo;
@@ -109,14 +111,16 @@ class ClassProvider
     }
   }
 
-  // Basically the reverse process to `this._flattenParams`:
-  // We get arguments for all the constructors as a single flat array.
-  // This method generates pre-bound "superConstructor" wrapper with correctly passing arguments.
-  _createConstructor(currentConstructorIdx, context, allArguments)
+  /**
+  * Basically the reverse process to `this._flattenParams`:
+  * We get arguments for all the constructors as a single flat array.
+  * This method generates pre-bound "superConstructor" wrapper with correctly passing arguments.
+  */
+  _createConstructor(currentConstructorIdx: any, context: any, allArguments: any[])
   {
     var constructorInfo = this._constructors[currentConstructorIdx];
     var nextConstructorInfo = this._constructors[currentConstructorIdx + 1];
-    var argsForCurrentConstructor;
+    var argsForCurrentConstructor: any[];
 
     if (nextConstructorInfo)
     {
@@ -132,13 +136,13 @@ class ClassProvider
 
     return function InjectedAndBoundSuperConstructor()
     {
-      // TODO(vojta): throw if arguments given
+      // @todo(vojta): throw if arguments given
       return new constructorInfo[0](...argsForCurrentConstructor);
     };
   }
 
   // It is called by injector to create an instance.
-  create(args)
+  create(args: any)
   {
     var context = Object.create(this.provider.prototype);
     var constructor = this._createConstructor(0, context, args);
@@ -153,16 +157,17 @@ class ClassProvider
   }
 }
 
-
-// FactoryProvider knows how to create instance from a factory function.
-// - all the state is immutable
+/**
+* FactoryProvider knows how to create instance from a factory function.
+* - all the state is immutable
+*/
 export class FactoryProvider
 {
-  provider;
-  params;
-  isPromise;
+  provider: any;
+  params: any;
+  isPromise: boolean;
 
-  constructor(factoryFunction, params, isPromise)
+  constructor(factoryFunction: Function, params: any, isPromise: boolean)
   {
     this.provider = factoryFunction;
     this.params = params;
@@ -177,14 +182,14 @@ export class FactoryProvider
     }
   }
 
-  create(args)
+  create(args: any)
   {
     return this.provider.apply(undefined, args);
   }
 }
 
 
-export function createProviderFromFnOrClass(fnOrClass, annotations)
+export function createProviderFromFnOrClass(fnOrClass: any, annotations: any)
 {
   if (isClass(fnOrClass))
   {

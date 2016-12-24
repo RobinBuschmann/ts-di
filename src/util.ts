@@ -1,23 +1,23 @@
 // A bunch of helper functions.
 
-function isUpperCase(char)
+function isUpperCase(char: any)
 {
   return char.toUpperCase() === char;
 }
 
-function isFunction(value)
+function isFunction(value: any)
 {
   return typeof value === 'function';
 }
 
 
-function isObject(value)
+function isObject(value: any)
 {
   return typeof value === 'object';
 }
 
 
-function toString(token)
+function toString(token: any)
 {
   if (typeof token === 'string')
   {
@@ -41,7 +41,7 @@ var ownKeys =
 (
   this
   && this.Reflect
-  && Reflect.ownKeys ? Reflect.ownKeys : function ownKeys(O)
+  && Reflect.ownKeys ? Reflect.ownKeys : function ownKeys(O: any)
   {
     var keys = Object.getOwnPropertyNames(O);
 

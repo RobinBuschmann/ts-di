@@ -1,31 +1,5 @@
 import {isFunction} from './util';
 
-// ******************************* Type Definitions start
-
-export class Annotations
-{
-  isPromise: boolean;
-  token: any;
-
-  [Symbol.iterator] = function* ()
-  {
-    let properties = Object.keys(this);
-    
-    for (let i of properties)
-    {
-      yield this[i];
-    }
-  }  
-}
-
-export interface Fn
-{
-  annotations: Annotations;
-  parameters: any;
-}
-
-// ******************************* Type Definitions end
-
 // This module contains:
 // - built-in annotation classes
 // - helpers to read/write annotations
@@ -33,22 +7,26 @@ export interface Fn
 
 // ANNOTATIONS
 
-// A built-in token.
-// Used to ask for pre-injected parent constructor.
-// A class constructor can ask for this.
-class SuperConstructor {}
+/**
+* A built-in token.
+* Used to ask for pre-injected parent constructor.
+* A class constructor can ask for this.
+*/
+export class SuperConstructor {}
 
-// A built-in scope.
-// Never cache.
-class TransientScope {}
+/**
+* A built-in scope.
+* Never cache.
+*/
+export class TransientScope {}
 
-class Inject
+export class Inject
 {
-  tokens;
-  isPromise;
-  isLazy;
+  tokens: any;
+  isPromise: boolean;
+  isLazy: boolean;
 
-  constructor(...tokens)
+  constructor(...tokens: any[])
   {
     this.tokens = tokens;
     this.isPromise = false;
@@ -56,9 +34,9 @@ class Inject
   }
 }
 
-class InjectPromise extends Inject
+export class InjectPromise extends Inject
 {
-  constructor(...tokens)
+  constructor(...tokens: any[])
   {
     super();
     this.tokens = tokens;
@@ -67,9 +45,9 @@ class InjectPromise extends Inject
   }
 }
 
-class InjectLazy extends Inject
+export class InjectLazy extends Inject
 {
-  constructor(...tokens)
+  constructor(...tokens: any[])
   {
     super();
     this.tokens = tokens;
@@ -78,24 +56,24 @@ class InjectLazy extends Inject
   }
 }
 
-class Provide
+export class Provide
 {
-  token;
-  isPromise;
+  token: any;
+  isPromise: boolean;
 
-  constructor(...token)
+  constructor(...token: any[])
   {
     this.token = token;
     this.isPromise = false;
   }
 }
 
-class ProvidePromise extends Provide
+export class ProvidePromise extends Provide
 {
-  token;
-  isPromise;
+  token: any;
+  isPromise: boolean;
 
-  constructor(...token)
+  constructor(...token: any[])
   {
     super();
     this.token = token;
@@ -103,30 +81,39 @@ class ProvidePromise extends Provide
   }
 }
 
-class ClassProvider {}
-class FactoryProvider {}
+export class ClassProvider {}
+export class FactoryProvider {}
 
 
 // HELPERS
 
-// Append annotation on a function or class.
-// This can be helpful when not using ES6+.
-function annotate(fn, annotation)
+export interface Fn
+{
+  annotations ?: (Inject | Provide)[];
+  parameters? : any[]
+}
+
+/**
+ * Append annotation on a function or class.
+ * This can be helpful when not using ES6+.
+ */
+export function annotate( fn: Fn, annotation: Inject | Provide )
 {
   fn.annotations = fn.annotations || [];
   fn.annotations.push(annotation);
 }
 
-
-// Read annotations on a function or class and return whether given annotation is present.
-function hasAnnotation(fn, annotationClass)
+/**
+ * Read annotations on a function or class and return whether given annotation is present.
+ */
+export function hasAnnotation(fn: Fn, annotationClass: any)
 {
-  if (!fn.annotations || fn.annotations.length === 0)
+  if ( !fn.annotations || fn.annotations.length === 0 )
   {
     return false;
   }
 
-  for (var annotation of fn.annotations)
+  for (let annotation of fn.annotations)
   {
     if (annotation instanceof annotationClass)
     {
@@ -138,32 +125,40 @@ function hasAnnotation(fn, annotationClass)
 }
 
 
-// Read annotations on a function or class and collect "interesting" metadata:
-function readAnnotations(fn: Fn)
+/**
+ * Read annotations on a function or class and collect "interesting" metadata.
+ * @todo to verify `params` type
+ */
+export function readAnnotations(fn: Fn)
 {
-  var collectedAnnotations =
+  let collectedAnnotations: {provide: Provide, params: (Provide | Inject)[]} =
   {
-    // Description of the provided value.
-    provide: {
+    /**
+     * Description of the provided value.
+     */
+    provide:
+    {
       token: null,
       isPromise: false
     },
 
-    // List of parameter descriptions.
-    // A parameter description is an object with properties:
-    // - token (anything)
-    // - isPromise (boolean)
-    // - isLazy (boolean)
+    /**
+     * List of parameter descriptions.
+     * A parameter description is an object with properties:
+     * - token (anything)
+     * - isPromise (boolean)
+     * - isLazy (boolean)
+     */
     params: []
   };
 
-  if (fn.annotations && (typeof fn.annotations === 'object'))
+  if ( fn && (typeof fn.annotations === 'object') )
   {
-    for (var annotation of fn.annotations)
+    for (let annotation of fn.annotations)
     {
       if (annotation instanceof Inject)
       {
-        annotation.tokens.forEach((token) =>
+        annotation.tokens.forEach( (token: any) =>
         {
           collectedAnnotations.params.push({
             token: token,
@@ -186,10 +181,10 @@ function readAnnotations(fn: Fn)
   {
     fn.parameters.forEach((param, idx) =>
     {
-      for (var paramAnnotation of param)
+      for (let paramAnnotation of param)
       {
         // Type annotation.
-        if (isFunction(paramAnnotation) && !collectedAnnotations.params[idx])
+        if ( isFunction(paramAnnotation) && !collectedAnnotations.params[idx] )
         {
           collectedAnnotations.params[idx] =
           {
@@ -214,66 +209,45 @@ function readAnnotations(fn: Fn)
   return collectedAnnotations;
 }
 
-// Decorator versions of annotation classes
-function inject(...tokens)
+/**
+ * Decorator versions of annotation classes
+ */
+export function inject(...tokens: any[])
 {
-  return function(fn)
+  return function(fn: Fn)
   {
     annotate(fn, new Inject(...tokens));
   };
 }
 
-function injectPromise(...tokens)
+export function injectPromise(...tokens: any[])
 {
-  return function(fn)
+  return function(fn: Fn)
   {
     annotate(fn, new InjectPromise(...tokens));
   };
 }
 
-function injectLazy(...tokens)
+export function injectLazy(...tokens: any[])
 {
-  return function(fn)
+  return function(fn: Fn)
   {
     annotate(fn, new InjectLazy(...tokens));
   };
 }
 
-function provide(...tokens)
+export function provide(...tokens: any[])
 {
-  return function(fn)
+  return function(fn: Fn)
   {
     annotate(fn, new Provide(...tokens));
   };
 }
 
-function providePromise(...tokens)
+export function providePromise(...tokens: any[])
 {
-  return function(fn)
+  return function(fn: Fn)
   {
     annotate(fn, new ProvidePromise(...tokens));
   };
 }
-
-export
-{
-  annotate,
-  hasAnnotation,
-  readAnnotations,
-
-  SuperConstructor,
-  TransientScope,
-  Inject,
-  InjectPromise,
-  InjectLazy,
-  Provide,
-  ProvidePromise,
-  ClassProvider,
-  FactoryProvider,
-
-  inject,
-  injectPromise,
-  injectLazy,
-  provide,
-  providePromise,
-};
