@@ -45,10 +45,10 @@ export function constructResolvingMessage(resolving: any[], token ?: any)
 */
 export class Injector
 {
-  _cache: any;
-  _providers: any;
-  _parent: any;
-  _scopes: any;
+  protected _cache: any;
+  protected _providers: any;
+  protected _parent: any;
+  protected _scopes: any;
 
   constructor(modules: any[] = [], parentInjector: any = null, providers = new Map(), scopes: any[] = [])
   {
@@ -66,7 +66,7 @@ export class Injector
   * Collect all registered providers that has given annotation.
   * Including providers defined in parent injectors.
   */
-  _collectProvidersWithAnnotation(annotationClass: any, collectedProviders: any)
+  protected _collectProvidersWithAnnotation(annotationClass: any, collectedProviders: any)
   {
     this._providers.forEach((provider: any, token: any) =>
     {
@@ -86,7 +86,7 @@ export class Injector
   * Load modules/function/classes.
   * This mutates `this._providers`, but it is only called during the constructor.
   */
-  _loadModules(modules: any)
+  protected _loadModules(modules: any)
   {
     for (let module of modules)
     {
@@ -105,7 +105,7 @@ export class Injector
   * Load a function or class.
   * This mutates `this._providers`, but it is only called during the constructor.
   */
-  _loadFnOrClass(fnOrClass: any)
+  protected _loadFnOrClass(fnOrClass: any)
   {
     // @todo(vojta): should we expose provider.token?
     let annotations = readAnnotations(fnOrClass);
@@ -119,7 +119,7 @@ export class Injector
   * Returns true if there is any provider registered for given token.
   * Including parent injectors.
   */
-  _hasProviderFor(token: any)
+  protected _hasProviderFor(token: any)
   {
     if (this._providers.has(token))
     {
@@ -137,7 +137,7 @@ export class Injector
   /**
    * Find the correct injector where the default provider should be instantiated and cached.
    */
-  _instantiateDefaultProvider(provider: any, token: any, resolving: any, wantPromise: any, wantLazy: any): any
+  protected _instantiateDefaultProvider(provider: any, token: any, resolving: any, wantPromise: any, wantLazy: any): any
   {
     // In root injector, instantiate here.
     if (!this._parent)

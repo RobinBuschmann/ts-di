@@ -9,7 +9,6 @@ import {isFunction, isObject, toString, isUpperCase, ownKeys} from './util';
 
 function isClass(clsOrFunction: any)
 {
-
   if (hasAnnotation(clsOrFunction, ClassProviderAnnotation))
   {
     return true
@@ -43,7 +42,7 @@ function isClass(clsOrFunction: any)
 // then calls `provider.create(args)`, passing in these arguments.
 
 
-var EmptyFunction = Object.getPrototypeOf(Function);
+let EmptyFunction = Object.getPrototypeOf(Function);
 
 /**
 * It knows how to instantiate classes.
@@ -60,7 +59,7 @@ class ClassProvider
   provider: any;
   isPromise: boolean;
   params: any[];
-  _constructors: any[];
+  protected _constructors: any[];
 
   constructor(clazz: any, params: any, isPromise: boolean)
   {
@@ -83,12 +82,12 @@ class ClassProvider
   * but it is only called during the constructor.
   * @todo(vojta): remove the annotations argument?
   */
-  _flattenParams(constructor: any, params: any)
+  protected _flattenParams(constructor: any, params: any)
   {
-    var SuperConstructor;
-    var constructorInfo;
+    let SuperConstructor;
+    let constructorInfo;
 
-    for (var param of params)
+    for (let param of params)
     {
       if (param.token === SuperConstructorAnnotation)
       {
@@ -116,11 +115,11 @@ class ClassProvider
   * We get arguments for all the constructors as a single flat array.
   * This method generates pre-bound "superConstructor" wrapper with correctly passing arguments.
   */
-  _createConstructor(currentConstructorIdx: any, context: any, allArguments: any[])
+  protected _createConstructor(currentConstructorIdx: any, context: any, allArguments: any[])
   {
-    var constructorInfo = this._constructors[currentConstructorIdx];
-    var nextConstructorInfo = this._constructors[currentConstructorIdx + 1];
-    var argsForCurrentConstructor: any[];
+    let constructorInfo = this._constructors[currentConstructorIdx];
+    let nextConstructorInfo = this._constructors[currentConstructorIdx + 1];
+    let argsForCurrentConstructor: any[];
 
     if (nextConstructorInfo)
     {
@@ -144,9 +143,9 @@ class ClassProvider
   // It is called by injector to create an instance.
   create(args: any)
   {
-    var context = Object.create(this.provider.prototype);
-    var constructor = this._createConstructor(0, context, args);
-    var returnedValue = constructor();
+    let context = Object.create(this.provider.prototype);
+    let constructor = this._createConstructor(0, context, args);
+    let returnedValue = constructor();
 
     if (isFunction(returnedValue) || isObject(returnedValue))
     {
@@ -173,7 +172,7 @@ export class FactoryProvider
     this.params = params;
     this.isPromise = isPromise;
 
-    for (var param of params)
+    for (let param of params)
     {
       if (param.token === SuperConstructorAnnotation)
       {

@@ -37,13 +37,13 @@ function toString(token: any)
   return token.toString();
 }
 
-var ownKeys =
+let ownKeys =
 (
   this
   && this.Reflect
   && Reflect.ownKeys ? Reflect.ownKeys : function ownKeys(O: any)
   {
-    var keys = Object.getOwnPropertyNames(O);
+    let keys = Object.getOwnPropertyNames(O);
 
     if ( Object.getOwnPropertySymbols )
       return keys.concat( Object.getOwnPropertySymbols(O).toString() );
