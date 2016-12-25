@@ -26,11 +26,11 @@ export class TransientScope {}
 
 export class Inject
 {
-  tokens: any;
+  tokens: IClassInterface<any>[];
   isPromise: boolean;
   isLazy: boolean;
 
-  constructor(...tokens: any[])
+  constructor(...tokens: IClassInterface<any>[])
   {
     this.tokens = tokens;
     this.isPromise = false;
@@ -40,7 +40,7 @@ export class Inject
 
 export class InjectPromise extends Inject
 {
-  constructor(...tokens: any[])
+  constructor(...tokens: IClassInterface<any>[])
   {
     super();
     this.tokens = tokens;
@@ -51,7 +51,7 @@ export class InjectPromise extends Inject
 
 export class InjectLazy extends Inject
 {
-  constructor(...tokens: any[])
+  constructor(...tokens: IClassInterface<any>[])
   {
     super();
     this.tokens = tokens;
@@ -65,7 +65,7 @@ export class Provide
   token: any;
   isPromise: boolean;
 
-  constructor(...token: any[])
+  constructor(...token: IClassInterface<any>[])
   {
     this.token = token;
     this.isPromise = false;
