@@ -9,12 +9,16 @@ import {isFunction, toString} from './util';
 import {profileInjector} from './profiler';
 import {createProviderFromFnOrClass} from './providers';
 
+export interface IClassInterface<T>
+{
+  new (...params: any[]): T;
+}
 
 /**
  * If a token is passed in, add it into the resolving array.
  * We need to check arguments.length because it can be null/undefined.
  */
-export function constructResolvingMessage(resolving: any[], token ?: any)
+export function constructResolvingMessage<T>(resolving: IClassInterface<T>[], token ?: IClassInterface<T>)
 {
   if (arguments.length > 1)
   {
@@ -68,7 +72,7 @@ export class Injector
   */
   protected _collectProvidersWithAnnotation(annotationClass: any, collectedProviders: any)
   {
-    this._providers.forEach((provider: any, token: any) =>
+    this._providers.forEach( <T>(provider: any, token: IClassInterface<T | this>) =>
     {
       if (!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass))
       {
@@ -119,7 +123,7 @@ export class Injector
   * Returns true if there is any provider registered for given token.
   * Including parent injectors.
   */
-  protected _hasProviderFor(token: any)
+  protected _hasProviderFor<T>(token: IClassInterface<T | this>): boolean
   {
     if (this._providers.has(token))
     {
@@ -137,7 +141,7 @@ export class Injector
   /**
    * Find the correct injector where the default provider should be instantiated and cached.
    */
-  protected _instantiateDefaultProvider(provider: any, token: any, resolving: any, wantPromise: any, wantLazy: any): any
+  protected _instantiateDefaultProvider<T>(provider: any, token: IClassInterface<T | this>, resolving: IClassInterface<T | this>[], wantPromise: any, wantLazy: any): any
   {
     // In root injector, instantiate here.
     if (!this._parent)
@@ -164,11 +168,11 @@ export class Injector
   /**
    * Return an instance for given token.
    */
-  get(token: any, resolving: any[] = [], wantPromise = false, wantLazy = false)
+  get<T>(token: IClassInterface<T | this>, resolving: IClassInterface<T | this>[] = [], wantPromise = false, wantLazy = false): T | this | Promise<T | this> | Function
   {
     let resolvingMsg = '';
     let provider: any;
-    let instance;
+    let instance: T | Promise<T>;
     let injector: Injector = this;
 
     if (token === null || token === undefined)
@@ -188,7 +192,9 @@ export class Injector
       return this;
     }
 
-    // @todo(vojta): optimize - no child injector for locals?
+    /**
+     * @todo(vojta): optimize - no child injector for locals?
+     */
     if (wantLazy)
     {
       return function createLazyInstance()
@@ -360,7 +366,7 @@ export class Injector
   }
 
 
-  getPromise(token: any)
+  getPromise<T>(token: IClassInterface<T | this>)
   {
     return this.get(token, [], true);
   }
