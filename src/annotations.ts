@@ -62,10 +62,10 @@ export class InjectLazy extends Inject
 
 export class Provide
 {
-  token: any;
+  token: IClassInterface<any>;
   isPromise: boolean;
 
-  constructor(...token: IClassInterface<any>[])
+  constructor(token: IClassInterface<any>)
   {
     this.token = token;
     this.isPromise = false;
@@ -74,12 +74,12 @@ export class Provide
 
 export class ProvidePromise extends Provide
 {
-  token: any;
+  token: IClassInterface<any>;
   isPromise: boolean;
 
-  constructor(...token: any[])
+  constructor(token: IClassInterface<any>)
   {
-    super();
+    super(token);
     this.token = token;
     this.isPromise = true;
   }
@@ -216,7 +216,7 @@ export function readAnnotations(fn: Fn)
 /**
  * Decorator versions of annotation classes
  */
-export function inject(...tokens: any[])
+export function inject(...tokens: IClassInterface<any>[])
 {
   return function(fn: Fn)
   {
@@ -224,7 +224,7 @@ export function inject(...tokens: any[])
   };
 }
 
-export function injectPromise(...tokens: any[])
+export function injectPromise(...tokens: IClassInterface<any>[])
 {
   return function(fn: Fn)
   {
@@ -232,7 +232,7 @@ export function injectPromise(...tokens: any[])
   };
 }
 
-export function injectLazy(...tokens: any[])
+export function injectLazy(...tokens: IClassInterface<any>[])
 {
   return function(fn: Fn)
   {
@@ -240,18 +240,18 @@ export function injectLazy(...tokens: any[])
   };
 }
 
-export function provide(...tokens: any[])
+export function provide(token: IClassInterface<any>)
 {
   return function(fn: Fn)
   {
-    annotate(fn, new Provide(...tokens));
+    annotate(fn, new Provide(token));
   };
 }
 
-export function providePromise(...tokens: any[])
+export function providePromise(token: IClassInterface<any>)
 {
   return function(fn: Fn)
   {
-    annotate(fn, new ProvidePromise(...tokens));
+    annotate(fn, new ProvidePromise(token));
   };
 }
