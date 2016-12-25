@@ -4,6 +4,10 @@ import {isFunction} from './util';
 // - built-in annotation classes
 // - helpers to read/write annotations
 
+export interface IClassInterface<T>
+{
+  new (...params: any[]): T;
+}
 
 // ANNOTATIONS
 
@@ -158,7 +162,7 @@ export function readAnnotations(fn: Fn)
     {
       if (annotation instanceof Inject)
       {
-        annotation.tokens.forEach( (token: any) =>
+        annotation.tokens.forEach( <T>(token: IClassInterface<T>) =>
         {
           collectedAnnotations.params.push({
             token: token,

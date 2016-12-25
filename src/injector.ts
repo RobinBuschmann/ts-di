@@ -3,16 +3,12 @@ import {
   readAnnotations,
   hasAnnotation,
   Provide as ProvideAnnotation,
-  TransientScope as TransientScopeAnnotation
+  TransientScope as TransientScopeAnnotation,
+  IClassInterface
 } from './annotations';
 import {isFunction, toString} from './util';
 import {profileInjector} from './profiler';
 import {createProviderFromFnOrClass} from './providers';
-
-export interface IClassInterface<T>
-{
-  new (...params: any[]): T;
-}
 
 /**
  * If a token is passed in, add it into the resolving array.
