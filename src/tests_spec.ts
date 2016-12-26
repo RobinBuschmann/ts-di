@@ -2,75 +2,122 @@ import {annotate, InjectDecorator, Inject, Injector} from './index.js';
 
 let injector = new Injector();
 
-class A{}
+let msg = 'this is message from property of class A';
 
-describe(`Using annotation function`, () =>
+class A
 {
-  class B
-  {
-    constructor(private a: A){}
-
-    getValue = () =>
-    {
-      return this.a;
-    }
-  }
-
-  annotate( B, new InjectDecorator(A) );
-
-  let instance = injector.get(B);
-
-  it(`\n + Should create instance of B`, () =>
-  {
-    let obj = (new B ( new A));
-
-    expect( instance.toString() ).toEqual( obj.toString() )
-  });
-
-  it(`\n + Should not to throw during call B.getValue()`, () =>
-  {
-    expect(instance.getValue).not.toThrow();
-  });
-
-  it(`\n + Should not to return instance of A`, () =>
-  {
-    expect( instance.getValue() ).toEqual( new A );
-  });
-
-});
+  message = msg;
+}
 
 describe(`Using decorator`, () =>
 {
   @Inject(A)
   class B
   {
-    constructor(private a: A){}
+    message = '';
 
-    getValue = () =>
+    constructor(instanceA: A)
     {
-      return this.a;
+      this.message = instanceA.message;
     }
   }
 
-  let instance = injector.get(B);
-
-  it(`\n + Should create instance of B`, () =>
+  @Inject(B)
+  class C
   {
-    let obj = (new B ( new A));
+    message = '';
 
-    expect( instance.toString() ).toEqual( obj.toString() )
+    constructor(instanceB: B)
+    {
+      this.message = instanceB.message;
+    }
+
+    getValue = () =>
+    {
+      return this.message;
+    }
+  }
+
+  let instanceC = injector.get(C);
+
+  it(`\n + Should create instance of C`, () =>
+  {
+    let obj = (new C (new B (new A)));
+
+    expect( instanceC.toString() ).toEqual( obj.toString() )
   });
 
-  it(`\n + Should not to throw during call B.getValue()`, () =>
+  it(`\n + Should not to throw during call C.getValue()`, () =>
   {
-    expect(instance.getValue).not.toThrow();
+    expect(instanceC.getValue).not.toThrow();
   });
 
-  it(`\n + Should return instance of A`, () =>
+  it(`\n + Should be not empty`, () =>
   {
-    expect( instance.getValue() ).toEqual( new A );
+    expect( instanceC.getValue().length ).toBeGreaterThan(0)
+  });
+
+  it(`\n + Should to return message from class A`, () =>
+  {
+    expect( instanceC.getValue() ).toEqual( msg );
   });
 
 });
 
+describe(`Using annotation function`, () =>
+{
+  class B
+  {
+    message = '';
+
+    constructor(instanceA: A)
+    {
+      this.message = instanceA.message;
+    }
+  }
+
+  annotate( B, new InjectDecorator(A) );
+
+  class C
+  {
+    message = '';
+
+    constructor(instanceB: B)
+    {
+      this.message = instanceB.message;
+    }
+
+    getValue = () =>
+    {
+      return this.message;
+    }
+  }
+
+  annotate( C, new InjectDecorator(B) );
+
+  let instanceC = injector.get(C);
+
+  it(`\n + Should create instance of C`, () =>
+  {
+    let obj = (new C (new B (new A)));
+
+    expect( instanceC.toString() ).toEqual( obj.toString() )
+  });
+
+  it(`\n + Should not to throw during call C.getValue()`, () =>
+  {
+    expect(instanceC.getValue).not.toThrow();
+  });
+
+  it(`\n + Should be not empty`, () =>
+  {
+    expect( instanceC.getValue().length ).toBeGreaterThan(0)
+  });
+
+  it(`\n + Should to return message from class A`, () =>
+  {
+    expect( instanceC.getValue() ).toEqual( msg );
+  });
+
+});
 
