@@ -15,3 +15,55 @@ tsc
 ```bash
 npm install ts-di --save
 ```
+
+## Examples resolve dependency
+
+Inject instance of class `A` for constructor of class `B`:
+
+### Using annotation a function
+
+```ts
+import {annotate, InjectDecorator} from 'ts-di';
+
+class B
+{
+  constructor(private a: A){}
+
+  getValue()
+  {
+    console.log(`There should be a instance of class A:`, this.a);
+  }
+}
+
+// All dependencies in InjectDecorator listed separated by commas
+annotate( B, new InjectDecorator(A) );
+```
+
+### Using decorator
+
+```ts
+import {Inject} from 'ts-di';
+
+// All dependencies in @Inject listed separated by commas
+@Inject(A)
+class B
+{
+  constructor(private a: A){}
+
+  getValue()
+  {
+    console.log(`There should be a instance of class A:`, this.a);
+  }
+}
+```
+
+### Get instance
+
+```ts
+import {Injector} from 'ts-di';
+
+let injector = new Injector();
+
+// Instance class B and resolve dependency
+let instance = injector.get(B);
+```
