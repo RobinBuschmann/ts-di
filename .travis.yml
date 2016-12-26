@@ -7,10 +7,11 @@ env:
   global:
 
 install:
-    - npm install
+  - npm install -g typescript
 
 before_script:
 
 script:
+  - tsc
 
 after_script:
