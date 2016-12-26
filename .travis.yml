@@ -15,5 +15,6 @@ before_script:
 
 script:
   - tsc
+  - jasmine
 
 after_script:
