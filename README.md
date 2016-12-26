@@ -4,12 +4,6 @@
 
 This fork - it's just version TypeScript [Angular di.js](https://github.com/angular/di.js).
 
-### Transpiling
-
-```bash
-tsc
-```
-
 ### Install
 
 ```bash
@@ -24,6 +18,8 @@ Inject instance of class `A` for constructor of class `B`:
 
 ```ts
 import {annotate, InjectDecorator} from 'ts-di';
+
+class A{}
 
 class B
 {
@@ -44,6 +40,8 @@ annotate( B, new InjectDecorator(A) );
 ```ts
 import {Inject} from 'ts-di';
 
+class A{}
+
 // All dependencies in @Inject listed separated by commas
 @Inject(A)
 class B
@@ -61,6 +59,7 @@ class B
 
 ```ts
 import {Injector} from 'ts-di';
+import {B} from './path/to/class/B';
 
 let injector = new Injector();
 
