@@ -2,7 +2,7 @@
 
 ## Dependency Injection v2
 
-This fork - it's just version TypeScript [Angular di.js](https://github.com/angular/di.js) without tests, examples and documentation.
+This fork - it's just version TypeScript [Angular di.js](https://github.com/angular/di.js).
 
 ### Transpiling
 
