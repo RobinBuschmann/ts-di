@@ -24,7 +24,7 @@ export class SuperConstructor {}
 */
 export class TransientScope {}
 
-export class Inject
+export class InjectDecorator
 {
   tokens: IClassInterface<any>[];
   isPromise: boolean;
@@ -38,7 +38,7 @@ export class Inject
   }
 }
 
-export class InjectPromise extends Inject
+export class InjectPromiseDecorator extends InjectDecorator
 {
   constructor(...tokens: IClassInterface<any>[])
   {
@@ -49,7 +49,7 @@ export class InjectPromise extends Inject
   }
 }
 
-export class InjectLazy extends Inject
+export class InjectLazyDecorator extends InjectDecorator
 {
   constructor(...tokens: IClassInterface<any>[])
   {
@@ -60,7 +60,7 @@ export class InjectLazy extends Inject
   }
 }
 
-export class Provide
+export class ProvideDecorator
 {
   token: IClassInterface<any>;
   isPromise: boolean;
@@ -72,7 +72,7 @@ export class Provide
   }
 }
 
-export class ProvidePromise extends Provide
+export class ProvidePromiseDecorator extends ProvideDecorator
 {
   token: IClassInterface<any>;
   isPromise: boolean;
@@ -93,7 +93,7 @@ export class FactoryProvider {}
 
 export interface Fn
 {
-  annotations ?: (Inject | Provide)[];
+  annotations ?: (InjectDecorator | ProvideDecorator)[];
   parameters? : any[]
 }
 
@@ -101,7 +101,7 @@ export interface Fn
  * Append annotation on a function or class.
  * This can be helpful when not using ES6+.
  */
-export function annotate( fn: Fn, annotation: Inject | Provide )
+export function annotate( fn: Fn, annotation: InjectDecorator | ProvideDecorator )
 {
   fn.annotations = fn.annotations || [];
   fn.annotations.push(annotation);
@@ -135,7 +135,7 @@ export function hasAnnotation(fn: Fn, annotationClass: any)
  */
 export function readAnnotations(fn: Fn)
 {
-  let collectedAnnotations: {provide: Provide, params: (Provide | Inject)[]} =
+  let collectedAnnotations: {provide: ProvideDecorator, params: (ProvideDecorator | InjectDecorator)[]} =
   {
     /**
      * Description of the provided value.
@@ -160,7 +160,7 @@ export function readAnnotations(fn: Fn)
   {
     for (let annotation of fn.annotations)
     {
-      if (annotation instanceof Inject)
+      if (annotation instanceof InjectDecorator)
       {
         annotation.tokens.forEach( <T>(token: IClassInterface<T>) =>
         {
@@ -172,7 +172,7 @@ export function readAnnotations(fn: Fn)
         });
       }
 
-      if (annotation instanceof Provide)
+      if (annotation instanceof ProvideDecorator)
       {
         collectedAnnotations.provide.token = annotation.token;
         collectedAnnotations.provide.isPromise = annotation.isPromise;
@@ -197,7 +197,7 @@ export function readAnnotations(fn: Fn)
             isLazy: false
           };
         }
-        else if (paramAnnotation instanceof Inject)
+        else if (paramAnnotation instanceof InjectDecorator)
         {
           collectedAnnotations.params[idx] =
           {
@@ -216,42 +216,42 @@ export function readAnnotations(fn: Fn)
 /**
  * Decorator versions of annotation classes
  */
-export function inject(...tokens: IClassInterface<any>[])
+export function Inject(...tokens: IClassInterface<any>[])
 {
   return function(fn: Fn)
   {
-    annotate(fn, new Inject(...tokens));
+    annotate(fn, new InjectDecorator(...tokens));
   };
 }
 
-export function injectPromise(...tokens: IClassInterface<any>[])
+export function InjectPromise(...tokens: IClassInterface<any>[])
 {
   return function(fn: Fn)
   {
-    annotate(fn, new InjectPromise(...tokens));
+    annotate(fn, new InjectPromiseDecorator(...tokens));
   };
 }
 
-export function injectLazy(...tokens: IClassInterface<any>[])
+export function InjectLazy(...tokens: IClassInterface<any>[])
 {
   return function(fn: Fn)
   {
-    annotate(fn, new InjectLazy(...tokens));
+    annotate(fn, new InjectLazyDecorator(...tokens));
   };
 }
 
-export function provide(token: IClassInterface<any>)
+export function Provide(token: IClassInterface<any>)
 {
   return function(fn: Fn)
   {
-    annotate(fn, new Provide(token));
+    annotate(fn, new ProvideDecorator(token));
   };
 }
 
-export function providePromise(token: IClassInterface<any>)
+export function ProvidePromise(token: IClassInterface<any>)
 {
   return function(fn: Fn)
   {
-    annotate(fn, new ProvidePromise(token));
+    annotate(fn, new ProvidePromiseDecorator(token));
   };
 }

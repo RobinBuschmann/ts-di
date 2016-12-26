@@ -2,7 +2,7 @@ import {
   annotate,
   readAnnotations,
   hasAnnotation,
-  Provide as ProvideAnnotation,
+  ProvideDecorator as ProvideAnnotation,
   TransientScope as TransientScopeAnnotation,
   IClassInterface
 } from './annotations';

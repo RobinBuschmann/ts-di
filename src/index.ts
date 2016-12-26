@@ -3,18 +3,18 @@
 export {Injector} from './injector';
 export {
   annotate,
-  Inject,
-  InjectLazy,
-  InjectPromise,
-  Provide,
-  ProvidePromise,
+  InjectDecorator,
+  InjectLazyDecorator,
+  InjectPromiseDecorator,
+  ProvideDecorator,
+  ProvidePromiseDecorator,
   SuperConstructor,
   TransientScope,
   ClassProvider,
   FactoryProvider,
-  inject,
-  injectPromise,
-  injectLazy,
-  provide,
-  providePromise
+  Inject,
+  InjectPromise,
+  InjectLazy,
+  Provide,
+  ProvidePromise
 } from './annotations';
