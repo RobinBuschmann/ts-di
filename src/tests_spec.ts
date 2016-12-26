@@ -66,7 +66,7 @@ describe(`Using decorator`, () =>
     expect(instance.getValue).not.toThrow();
   });
 
-  it(`\n + Should not to return instance of A`, () =>
+  it(`\n + Should return instance of A`, () =>
   {
     expect( instance.getValue() ).toEqual( new A );
   });

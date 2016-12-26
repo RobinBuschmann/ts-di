@@ -131,7 +131,6 @@ export function hasAnnotation(fn: Fn, annotationClass: any)
 
 /**
  * Read annotations on a function or class and collect "interesting" metadata.
- * @todo to verify `params` type
  */
 export function readAnnotations(fn: Fn)
 {
