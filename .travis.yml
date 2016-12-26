@@ -1,0 +1,15 @@
+language: node_js
+
+node_js:
+  - 6.9.2
+
+env:
+  global:
+
+install:
+
+before_script:
+
+script:
+
+after_script:
