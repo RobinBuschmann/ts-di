@@ -164,12 +164,12 @@ export class Injector
   /**
    * Return an instance for given token.
    */
-  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[]): T;
-  get(token: IClassInterface<this>, resolving?: IClassInterface<this>[]): this;
-  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[], wantPromise?: boolean): T | Promise<T>;
-  get(token: IClassInterface<this>, resolving?: IClassInterface<this>[], wantPromise?: boolean): this | Promise<this>;
-  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[], wantPromise?: boolean, wantLazy?: boolean): T | Promise<T> | Function;
   get(token: IClassInterface<this>, resolving?: IClassInterface<this>[], wantPromise?: boolean, wantLazy?: boolean): this | Promise<this> | Function;
+  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[], wantPromise?: boolean, wantLazy?: boolean): T | Promise<T> | Function;
+  get(token: IClassInterface<this>, resolving?: IClassInterface<this>[], wantPromise?: boolean): this | Promise<this>;
+  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[], wantPromise?: boolean): T | Promise<T>;
+  get(token: IClassInterface<this>, resolving?: IClassInterface<this>[]): this;
+  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[]): T;
   get<T>(token: IClassInterface<T | this>, resolving: IClassInterface<T | this>[] = [], wantPromise = false, wantLazy = false): T | this | Promise<T | this> | Function
   {
     let resolvingMsg = '';

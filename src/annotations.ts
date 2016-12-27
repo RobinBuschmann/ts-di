@@ -157,7 +157,7 @@ export function readAnnotations(fn: Fn)
 
   if ( fn && (typeof fn.annotations === 'object') )
   {
-    for (let annotation of fn.annotations)
+    for (const annotation of fn.annotations)
     {
       if (annotation instanceof InjectDecorator)
       {
