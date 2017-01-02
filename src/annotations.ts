@@ -88,7 +88,7 @@ export class FactoryProvider {}
 
 // HELPERS
 
-export interface Fn
+export interface ClassAnnotations
 {
   annotations ?: (InjectDecorator | ProvideDecorator)[];
   parameters ?: any[];
@@ -98,7 +98,7 @@ export interface Fn
  * Append annotation on a function or class.
  * This can be helpful when not using ES6+.
  */
-export function annotate( fn: Fn, annotation: InjectDecorator | ProvideDecorator )
+export function annotate( fn: ClassAnnotations, annotation: InjectDecorator | ProvideDecorator )
 {
   fn.annotations = fn.annotations || [];
   fn.annotations.unshift(annotation);
@@ -107,7 +107,7 @@ export function annotate( fn: Fn, annotation: InjectDecorator | ProvideDecorator
 /**
  * Read annotations on a function or class and return whether given annotation is present.
  */
-export function hasAnnotation(fn: Fn, annotationClass: any)
+export function hasAnnotation(fn: ClassAnnotations, annotationClass: any)
 {
   if( !fn.annotations || fn.annotations.length === 0 )
   {
@@ -136,7 +136,7 @@ export interface ParamsDescriptions
 /**
  * Read annotations on a function or class and collect "interesting" metadata.
  */
-export function readAnnotations(fn: Fn)
+export function readAnnotations(fn: ClassAnnotations)
 {
   let collectedAnnotations: {provide: ProvideDecorator | InjectDecorator, params: ParamsDescriptions[]} =
   {
@@ -223,7 +223,7 @@ export function readAnnotations(fn: Fn)
  */
 export function Inject(...tokens: ClassInterface<any>[])
 {
-  return function(fn: Fn)
+  return function(fn: ClassAnnotations)
   {
     annotate(fn, new InjectDecorator(...tokens));
   };
@@ -231,7 +231,7 @@ export function Inject(...tokens: ClassInterface<any>[])
 
 export function InjectPromise(...tokens: ClassInterface<any>[])
 {
-  return function(fn: Fn)
+  return function(fn: ClassAnnotations)
   {
     annotate(fn, new InjectPromiseDecorator(...tokens));
   };
@@ -239,7 +239,7 @@ export function InjectPromise(...tokens: ClassInterface<any>[])
 
 export function InjectLazy(...tokens: ClassInterface<any>[])
 {
-  return function(fn: Fn)
+  return function(fn: ClassAnnotations)
   {
     annotate(fn, new InjectLazyDecorator(...tokens));
   };
@@ -247,7 +247,7 @@ export function InjectLazy(...tokens: ClassInterface<any>[])
 
 export function Provide(token: ClassInterface<any>)
 {
-  return function(fn: Fn)
+  return function(fn: ClassAnnotations)
   {
     annotate(fn, new ProvideDecorator(token));
   };
@@ -255,7 +255,7 @@ export function Provide(token: ClassInterface<any>)
 
 export function ProvidePromise(token: ClassInterface<any>)
 {
-  return function(fn: Fn)
+  return function(fn: ClassAnnotations)
   {
     annotate(fn, new ProvidePromiseDecorator(token));
   };
