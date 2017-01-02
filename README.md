@@ -66,3 +66,14 @@ let injector = new Injector();
 // Instance class B and resolve dependency
 let instance = injector.get(B);
 ```
+
+## Usage decorators
+
+Now supports five decorators:
+- For resolving chain dependencies:
+  - Inject
+  - InjectPromise
+  - InjectLazy
+- For resolving single dependency (useful for testing):
+  - Provide
+  - ProvidePromise
