@@ -9,7 +9,7 @@ import {isFunction, isObject, toString, isUpperCase, ownKeys} from './util';
 
 function isClass(clsOrFunction: any)
 {
-  if (hasAnnotation(clsOrFunction, ClassProviderAnnotation))
+  if(hasAnnotation(clsOrFunction, ClassProviderAnnotation))
   {
     return true
   } 
@@ -19,7 +19,7 @@ function isClass(clsOrFunction: any)
   }
   /* When code is minified, class names are no longer upper case, so we skip this check
    * if the name is oddly short (which happens during minification). */
-  else if (clsOrFunction.name && clsOrFunction.name.length && clsOrFunction.name.length > 3)
+  else if(clsOrFunction.name && clsOrFunction.name.length && clsOrFunction.name.length > 3)
   {
     return isUpperCase(clsOrFunction.name.charAt(0));
   }
@@ -89,11 +89,11 @@ class ClassProvider
 
     for (let param of params)
     {
-      if (param.token === SuperConstructorAnnotation)
+      if(param.token === SuperConstructorAnnotation)
       {
         SuperConstructor = Object.getPrototypeOf(constructor);
 
-        if (SuperConstructor === EmptyFunction)
+        if(SuperConstructor === EmptyFunction)
         {
           throw new Error(`${toString(constructor)} does not have a parent constructor. Only classes with a parent can ask for SuperConstructor!`);
         }
@@ -121,7 +121,7 @@ class ClassProvider
     let nextConstructorInfo = this._constructors[currentConstructorIdx + 1];
     let argsForCurrentConstructor: any[];
 
-    if (nextConstructorInfo)
+    if(nextConstructorInfo)
     {
       argsForCurrentConstructor = allArguments
           .slice(constructorInfo[1], nextConstructorInfo[1])
@@ -147,7 +147,7 @@ class ClassProvider
     let constructor = this._createConstructor(0, context, args);
     let returnedValue = constructor();
 
-    if (isFunction(returnedValue) || isObject(returnedValue))
+    if(isFunction(returnedValue) || isObject(returnedValue))
     {
       return returnedValue;
     }
@@ -174,7 +174,7 @@ export class FactoryProvider
 
     for (let param of params)
     {
-      if (param.token === SuperConstructorAnnotation)
+      if(param.token === SuperConstructorAnnotation)
       {
         throw new Error(`${toString(factoryFunction)} is not a class. Only classes with a parent can ask for SuperConstructor!`);
       }
@@ -190,7 +190,7 @@ export class FactoryProvider
 
 export function createProviderFromFnOrClass(fnOrClass: any, annotations: any)
 {
-  if (isClass(fnOrClass))
+  if(isClass(fnOrClass))
   {
     return new ClassProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
   }

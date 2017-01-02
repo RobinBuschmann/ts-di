@@ -4,7 +4,7 @@ import {
   hasAnnotation,
   ProvideDecorator as ProvideAnnotation,
   TransientScope as TransientScopeAnnotation,
-  IClassInterface
+  ClassInterface
 } from './annotations';
 import {isFunction, toString} from './util';
 import {profileInjector} from './profiler';
@@ -14,14 +14,14 @@ import {createProviderFromFnOrClass} from './providers';
  * If a token is passed in, add it into the resolving array.
  * We need to check arguments.length because it can be null/undefined.
  */
-export function constructResolvingMessage<T>(resolving: IClassInterface<T>[], token ?: IClassInterface<T>)
+export function constructResolvingMessage<T>(resolving: ClassInterface<T>[], token ?: ClassInterface<T>)
 {
-  if (arguments.length > 1)
+  if(arguments.length > 1)
   {
     resolving.push(token);
   }
 
-  if (resolving.length > 1)
+  if(resolving.length > 1)
   {
     return ` (${resolving.map(toString).join(' -> ')})`;
   }
@@ -45,17 +45,17 @@ export function constructResolvingMessage<T>(resolving: IClassInterface<T>[], to
 */
 export class Injector
 {
-  protected _cache: any;
-  protected _providers: any;
-  protected _parent: any;
-  protected _scopes: any;
+  protected _cache: Map<any, any>;
 
-  constructor(modules: any[] = [], parentInjector: any = null, providers = new Map(), scopes: any[] = [])
+  constructor
+  (
+    modules: any[] = []
+    ,protected _parent: any = null
+    ,protected _providers = new Map()
+    ,protected _scopes: any[] = []
+  )
   {
     this._cache = new Map();
-    this._providers = providers;
-    this._parent = parentInjector;
-    this._scopes = scopes;
 
     this._loadModules(modules);
 
@@ -68,15 +68,15 @@ export class Injector
   */
   protected _collectProvidersWithAnnotation(annotationClass: any, collectedProviders: any)
   {
-    this._providers.forEach( <T>(provider: any, token: IClassInterface<T | this>) =>
+    this._providers.forEach(<T>(provider: any, token: ClassInterface<T>) =>
     {
-      if (!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass))
+      if(!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass))
       {
         collectedProviders.set(token, provider);
       }
     });
 
-    if (this._parent)
+    if(this._parent)
     {
       this._parent._collectProvidersWithAnnotation(annotationClass, collectedProviders);
     }
@@ -91,7 +91,7 @@ export class Injector
     for (let module of modules)
     {
       // A single provider (class or function).
-      if (isFunction(module))
+      if(isFunction(module))
       {
         this._loadFnOrClass(module);
         continue;
@@ -119,14 +119,14 @@ export class Injector
   * Returns true if there is any provider registered for given token.
   * Including parent injectors.
   */
-  protected _hasProviderFor<T>(token: IClassInterface<T | this>): boolean
+  protected _hasProviderFor<T>(token: ClassInterface<T>): boolean
   {
-    if (this._providers.has(token))
+    if(this._providers.has(token))
     {
       return true;
     }
 
-    if (this._parent)
+    if(this._parent)
     {
       return this._parent._hasProviderFor(token);
     }
@@ -137,10 +137,12 @@ export class Injector
   /**
    * Find the correct injector where the default provider should be instantiated and cached.
    */
-  protected _instantiateDefaultProvider<T>(provider: any, token: IClassInterface<T | this>, resolving: IClassInterface<T | this>[], wantPromise: any, wantLazy: any): any
+  protected _instantiateDefaultProvider<T>(provider: any, token: ClassInterface<T>, resolving: ClassInterface<T>[], wantPromise: any, wantLazy: any): any
+  protected _instantiateDefaultProvider<T>(provider: any, token: ClassInterface<this>, resolving: ClassInterface<this>[], wantPromise: any, wantLazy: any): any
+  protected _instantiateDefaultProvider<T>(provider: any, token: ClassInterface<T | this>, resolving: ClassInterface<T | this>[], wantPromise: any, wantLazy: any): any
   {
     // In root injector, instantiate here.
-    if (!this._parent)
+    if(!this._parent)
     {
       this._providers.set(token, provider);
       return this.get(token, resolving, wantPromise, wantLazy);
@@ -149,7 +151,7 @@ export class Injector
     // Check if this injector forces new instance of this provider.
     for (let ScopeClass of this._scopes)
     {
-      if (hasAnnotation(provider.provider, ScopeClass))
+      if(hasAnnotation(provider.provider, ScopeClass))
       {
         this._providers.set(token, provider);
         return this.get(token, resolving, wantPromise, wantLazy);
@@ -164,29 +166,29 @@ export class Injector
   /**
    * Return an instance for given token.
    */
-  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[]): T;
-  get(token: IClassInterface<this>, resolving?: IClassInterface<this>[]): this;
-  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[], wantPromise?: boolean): T | Promise<T>;
-  get(token: IClassInterface<this>, resolving?: IClassInterface<this>[], wantPromise?: boolean): this | Promise<this>;
-  get<T>(token: IClassInterface<T>, resolving?: IClassInterface<T>[], wantPromise?: boolean, wantLazy?: boolean): T | Promise<T> | Function;
-  get(token: IClassInterface<this>, resolving?: IClassInterface<this>[], wantPromise?: boolean, wantLazy?: boolean): this | Promise<this> | Function;
-  get<T>(token: IClassInterface<T | this>, resolving: IClassInterface<T | this>[] = [], wantPromise = false, wantLazy = false): T | this | Promise<T | this> | Function
+  get<T>(token: ClassInterface<T>, resolving?: ClassInterface<T>[]): T;
+  get(token: ClassInterface<this>, resolving?: ClassInterface<this>[]): this;
+  get<T>(token: ClassInterface<T>, resolving?: ClassInterface<T>[], wantPromise?: boolean): T | Promise<T>;
+  get(token: ClassInterface<this>, resolving?: ClassInterface<this>[], wantPromise?: boolean): this | Promise<this>;
+  get<T>(token: ClassInterface<T>, resolving?: ClassInterface<T>[], wantPromise?: boolean, wantLazy?: boolean): T | Promise<T> | Function;
+  get(token: ClassInterface<this>, resolving?: ClassInterface<this>[], wantPromise?: boolean, wantLazy?: boolean): this | Promise<this> | Function;
+  get<T>(token: ClassInterface<T | this>, resolving: ClassInterface<T | this>[] = [], wantPromise = false, wantLazy = false): T | this | Promise<T | this> | Function
   {
     let resolvingMsg = '';
     let provider: any;
     let instance: T | Promise<T>;
     let injector: Injector = this;
 
-    if (token === null || token === undefined)
+    if(token === null || token === undefined)
     {
       resolvingMsg = constructResolvingMessage(resolving, token);
       throw new Error(`Invalid token "${token}" requested!${resolvingMsg}`);
     }
 
     // Special case, return itself.
-    if (token === Injector)
+    if(token === Injector)
     {
-      if (wantPromise)
+      if(wantPromise)
       {
         return Promise.resolve(this);
       }
@@ -197,13 +199,13 @@ export class Injector
     /**
      * @todo(vojta): optimize - no child injector for locals?
      */
-    if (wantLazy)
+    if(wantLazy)
     {
       return function createLazyInstance()
       {
         let lazyInjector = injector;
 
-        if (arguments.length)
+        if(arguments.length)
         {
           let locals = [];
           let args = arguments;
@@ -231,18 +233,18 @@ export class Injector
     }
 
     // Check if there is a cached instance already.
-    if (this._cache.has(token))
+    if(this._cache.has(token))
     {
       instance = this._cache.get(token);
       provider = this._providers.get(token);
 
-      if (provider.isPromise && !wantPromise)
+      if(provider.isPromise && !wantPromise)
       {
         resolvingMsg = constructResolvingMessage(resolving, token);
         throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
       }
 
-      if (!provider.isPromise && wantPromise)
+      if(!provider.isPromise && wantPromise)
       {
         return Promise.resolve(instance);
       }
@@ -253,15 +255,15 @@ export class Injector
     provider = this._providers.get(token);
 
     // No provider defined (overridden), use the default provider (token).
-    if (!provider && isFunction(token) && !this._hasProviderFor(token))
+    if(!provider && isFunction(token) && !this._hasProviderFor(token))
     {
       provider = createProviderFromFnOrClass(token, readAnnotations(token));
       return this._instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy);
     }
 
-    if (!provider)
+    if(!provider)
     {
-      if (!this._parent)
+      if(!this._parent)
       {
         resolvingMsg = constructResolvingMessage(resolving, token);
         throw new Error(`No provider for ${toString(token)}!${resolvingMsg}`);
@@ -270,7 +272,7 @@ export class Injector
       return this._parent.get(token, resolving, wantPromise, wantLazy);
     }
 
-    if (resolving.indexOf(token) !== -1)
+    if(resolving.indexOf(token) !== -1)
     {
       resolvingMsg = constructResolvingMessage(resolving, token);
       throw new Error(`Cannot instantiate cyclic dependency!${resolvingMsg}`);
@@ -289,7 +291,7 @@ export class Injector
     let delayingInstantiation = wantPromise && provider.params.some( (param: any) => !param.isPromise);
     let args = provider.params.map( (param: any) =>
     {
-      if (delayingInstantiation)
+      if(delayingInstantiation)
       {
         return this.get(param.token, resolving, true, param.isLazy);
       }
@@ -298,7 +300,7 @@ export class Injector
     });
 
     // Delaying the instantiation - return a promise.
-    if (delayingInstantiation)
+    if(delayingInstantiation)
     {
       let delayedResolving = resolving.slice(); // clone
 
@@ -319,7 +321,7 @@ export class Injector
           throw e;
         }
 
-        if (!hasAnnotation(provider.provider, TransientScopeAnnotation))
+        if(!hasAnnotation(provider.provider, TransientScopeAnnotation))
         {
           injector._cache.set(token, instance);
         }
@@ -345,19 +347,19 @@ export class Injector
       throw e;
     }
 
-    if (!hasAnnotation(provider.provider, TransientScopeAnnotation))
+    if(!hasAnnotation(provider.provider, TransientScopeAnnotation))
     {
       this._cache.set(token, instance);
     }
 
-    if (!wantPromise && provider.isPromise)
+    if(!wantPromise && provider.isPromise)
     {
       resolvingMsg = constructResolvingMessage(resolving);
 
       throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
     }
 
-    if (wantPromise && !provider.isPromise)
+    if(wantPromise && !provider.isPromise)
     {
       instance = Promise.resolve(instance);
     }
@@ -368,7 +370,9 @@ export class Injector
   }
 
 
-  getPromise<T>(token: IClassInterface<T | this>)
+  getPromise<T>(token: ClassInterface<T>): T;
+  getPromise<T>(token: ClassInterface<this>): this;
+  getPromise<T>(token: ClassInterface<T | this>)
   {
     return this.get(token, [], true);
   }

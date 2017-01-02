@@ -5,13 +5,13 @@ import {Injector} from './injector';
 let IS_DEBUG = false;
 let _global: any = null;
 
-if (typeof process === 'object' && process.env)
+if(typeof process === 'object' && process.env)
 {
   // Node.js
   IS_DEBUG = !!process.env['DEBUG'];
   _global = global;
 }
-else if (typeof location === 'object' && location.search)
+else if(typeof location === 'object' && location.search)
 {
   // Browser
   IS_DEBUG = /di_debug/.test(location.search);
@@ -28,7 +28,7 @@ function getUniqueId()
 
 function serializeToken(token: any, tokens: any)
 {
-  if (!tokens.has(token))
+  if(!tokens.has(token))
   {
     tokens.set(token, getUniqueId().toString());
   }
@@ -84,12 +84,12 @@ function serializeInjector(injector: any, tokens: any, Injector: Injector)
 
 export function profileInjector(injector: Injector, Injector: any)
 {
-  if (!IS_DEBUG)
+  if(!IS_DEBUG)
   {
     return;
   }
 
-  if (!_global.__di_dump__)
+  if(!_global.__di_dump__)
   {
     _global.__di_dump__ =
     {
