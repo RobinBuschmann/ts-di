@@ -125,13 +125,20 @@ export function hasAnnotation(fn: Fn, annotationClass: any)
   return false;
 }
 
+export interface ParamsDescriptions
+{
+  token: any,
+  isPromise: boolean,
+  isLazy ?: boolean
+}
+
 
 /**
  * Read annotations on a function or class and collect "interesting" metadata.
  */
 export function readAnnotations(fn: Fn)
 {
-  let collectedAnnotations: {provide: ProvideDecorator, params: (ProvideDecorator | InjectDecorator)[]} =
+  let collectedAnnotations: {provide: ProvideDecorator | InjectDecorator, params: ParamsDescriptions[]} =
   {
     /**
      * Description of the provided value.
