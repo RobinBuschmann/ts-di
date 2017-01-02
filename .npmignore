@@ -2,4 +2,9 @@ node_modules
 ts-di-*
 npm-debug.log
 .travis.yml
+.gitignore
 src
+tsconfig.json
+dist/test
+*.map
+.vscode
