@@ -71,9 +71,9 @@ let instance = injector.get(B);
 
 Now supports five decorators:
 - For resolving chain dependencies:
-  - Inject
-  - InjectPromise
-  - InjectLazy
+  - `@Inject`
+  - `@InjectPromise`
+  - `@InjectLazy`
 - For resolving single dependency (useful for testing):
-  - Provide
-  - ProvidePromise
+  - `@Provide`
+  - `@ProvidePromise`
