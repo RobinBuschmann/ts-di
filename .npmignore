@@ -6,5 +6,4 @@ npm-debug.log
 src
 tsconfig.json
 dist/test
-*.map
 .vscode
