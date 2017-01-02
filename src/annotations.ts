@@ -4,7 +4,7 @@ import {isFunction} from './util';
 // - built-in annotation classes
 // - helpers to read/write annotations
 
-export interface IClassInterface<T>
+export interface ClassInterface<T>
 {
   new (...params: any[]): T;
 }
@@ -26,11 +26,11 @@ export class TransientScope {}
 
 export class InjectDecorator
 {
-  tokens: IClassInterface<any>[];
+  tokens: ClassInterface<any>[];
   isPromise: boolean;
   isLazy: boolean;
 
-  constructor(...tokens: IClassInterface<any>[])
+  constructor(...tokens: ClassInterface<any>[])
   {
     this.tokens = tokens;
     this.isPromise = false;
@@ -40,7 +40,7 @@ export class InjectDecorator
 
 export class InjectPromiseDecorator extends InjectDecorator
 {
-  constructor(...tokens: IClassInterface<any>[])
+  constructor(...tokens: ClassInterface<any>[])
   {
     super();
     this.tokens = tokens;
@@ -51,7 +51,7 @@ export class InjectPromiseDecorator extends InjectDecorator
 
 export class InjectLazyDecorator extends InjectDecorator
 {
-  constructor(...tokens: IClassInterface<any>[])
+  constructor(...tokens: ClassInterface<any>[])
   {
     super();
     this.tokens = tokens;
@@ -62,10 +62,10 @@ export class InjectLazyDecorator extends InjectDecorator
 
 export class ProvideDecorator
 {
-  token: IClassInterface<any>;
+  token: ClassInterface<any>;
   isPromise: boolean;
 
-  constructor(token: IClassInterface<any>)
+  constructor(token: ClassInterface<any>)
   {
     this.token = token;
     this.isPromise = false;
@@ -74,10 +74,10 @@ export class ProvideDecorator
 
 export class ProvidePromiseDecorator extends ProvideDecorator
 {
-  token: IClassInterface<any>;
+  token: ClassInterface<any>;
   isPromise: boolean;
 
-  constructor(token: IClassInterface<any>)
+  constructor(token: ClassInterface<any>)
   {
     super(token);
     this.token = token;
@@ -161,7 +161,7 @@ export function readAnnotations(fn: Fn)
     {
       if (annotation instanceof InjectDecorator)
       {
-        annotation.tokens.forEach( <T>(token: IClassInterface<T>) =>
+        annotation.tokens.forEach( <T>(token: ClassInterface<T>) =>
         {
           collectedAnnotations.params.push({
             token: token,
@@ -215,7 +215,7 @@ export function readAnnotations(fn: Fn)
 /**
  * Decorator versions of annotation classes
  */
-export function Inject(...tokens: IClassInterface<any>[])
+export function Inject(...tokens: ClassInterface<any>[])
 {
   return function(fn: Fn)
   {
@@ -223,7 +223,7 @@ export function Inject(...tokens: IClassInterface<any>[])
   };
 }
 
-export function InjectPromise(...tokens: IClassInterface<any>[])
+export function InjectPromise(...tokens: ClassInterface<any>[])
 {
   return function(fn: Fn)
   {
@@ -231,7 +231,7 @@ export function InjectPromise(...tokens: IClassInterface<any>[])
   };
 }
 
-export function InjectLazy(...tokens: IClassInterface<any>[])
+export function InjectLazy(...tokens: ClassInterface<any>[])
 {
   return function(fn: Fn)
   {
@@ -239,7 +239,7 @@ export function InjectLazy(...tokens: IClassInterface<any>[])
   };
 }
 
-export function Provide(token: IClassInterface<any>)
+export function Provide(token: ClassInterface<any>)
 {
   return function(fn: Fn)
   {
@@ -247,7 +247,7 @@ export function Provide(token: IClassInterface<any>)
   };
 }
 
-export function ProvidePromise(token: IClassInterface<any>)
+export function ProvidePromise(token: ClassInterface<any>)
 {
   return function(fn: Fn)
   {
