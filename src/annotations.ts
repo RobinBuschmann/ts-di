@@ -27,6 +27,7 @@ export class TransientScope {}
 export class InjectDecorator
 {
   tokens: ClassInterface<any>[];
+  token: ClassInterface<any>;
   isPromise: boolean;
   isLazy: boolean;
 
@@ -74,9 +75,6 @@ export class ProvideDecorator
 
 export class ProvidePromiseDecorator extends ProvideDecorator
 {
-  token: ClassInterface<any>;
-  isPromise: boolean;
-
   constructor(token: ClassInterface<any>)
   {
     super(token);
@@ -88,13 +86,12 @@ export class ProvidePromiseDecorator extends ProvideDecorator
 export class ClassProvider {}
 export class FactoryProvider {}
 
-
 // HELPERS
 
 export interface Fn
 {
   annotations ?: (InjectDecorator | ProvideDecorator)[];
-  parameters? : any[]
+  parameters ?: any[];
 }
 
 /**
@@ -104,7 +101,7 @@ export interface Fn
 export function annotate( fn: Fn, annotation: InjectDecorator | ProvideDecorator )
 {
   fn.annotations = fn.annotations || [];
-  fn.annotations.push(annotation);
+  fn.annotations.unshift(annotation);
 }
 
 /**
@@ -112,14 +109,14 @@ export function annotate( fn: Fn, annotation: InjectDecorator | ProvideDecorator
  */
 export function hasAnnotation(fn: Fn, annotationClass: any)
 {
-  if ( !fn.annotations || fn.annotations.length === 0 )
+  if( !fn.annotations || fn.annotations.length === 0 )
   {
     return false;
   }
 
   for (let annotation of fn.annotations)
   {
-    if (annotation instanceof annotationClass)
+    if(annotation instanceof annotationClass)
     {
       return true;
     }
@@ -155,11 +152,11 @@ export function readAnnotations(fn: Fn)
     params: []
   };
 
-  if ( fn && (typeof fn.annotations === 'object') )
+  if( fn && (typeof fn.annotations === 'object') )
   {
-    for (const annotation of fn.annotations)
+    for(const annotation of fn.annotations)
     {
-      if (annotation instanceof InjectDecorator)
+      if(annotation instanceof InjectDecorator)
       {
         annotation.tokens.forEach( <T>(token: ClassInterface<T>) =>
         {
@@ -171,7 +168,7 @@ export function readAnnotations(fn: Fn)
         });
       }
 
-      if (annotation instanceof ProvideDecorator)
+      if(annotation instanceof ProvideDecorator)
       {
         collectedAnnotations.provide.token = annotation.token;
         collectedAnnotations.provide.isPromise = annotation.isPromise;
@@ -179,37 +176,39 @@ export function readAnnotations(fn: Fn)
     }
   }
 
-  // Read annotations for individual parameters.
-  if (fn.parameters)
-  {
-    fn.parameters.forEach((param, idx) =>
-    {
-      for (let paramAnnotation of param)
-      {
-        // Type annotation.
-        if ( isFunction(paramAnnotation) && !collectedAnnotations.params[idx] )
-        {
-          collectedAnnotations.params[idx] =
-          {
-            token: paramAnnotation,
-            isPromise: false,
-            isLazy: false
-          };
-        }
-        else if (paramAnnotation instanceof InjectDecorator)
-        {
-          collectedAnnotations.params[idx] =
-          {
-            token: paramAnnotation.tokens[0],
-            isPromise: paramAnnotation.isPromise,
-            isLazy: paramAnnotation.isLazy
-          };
-        }
-      }
-    });
-  }
+  if(fn.parameters)
+    fn.parameters.forEach(readIndividualParams);
 
   return collectedAnnotations;
+
+  /**
+   * Read annotations for individual parameters.
+   */
+  function readIndividualParams(param: any, idx: number): any
+  {
+    for(const paramAnnotation of param)
+    {
+      // Type annotation.
+      if(isFunction(paramAnnotation) && !collectedAnnotations.params[idx])
+      {
+        collectedAnnotations.params[idx] =
+        {
+          token: paramAnnotation,
+          isPromise: false,
+          isLazy: false
+        };
+      }
+      else if(paramAnnotation instanceof InjectDecorator)
+      {
+        collectedAnnotations.params[idx] =
+        {
+          token: paramAnnotation.tokens[0],
+          isPromise: paramAnnotation.isPromise,
+          isLazy: paramAnnotation.isLazy
+        };
+      }
+    }
+  }
 }
 
 /**
