@@ -57,7 +57,9 @@ describe('async', function()
     let injector = new Injector([FetchUsers]);
     let p = injector.getPromise(UserList)
     
-    expect(p).toBePromiseLike();
+    // The trick for TypeScript when we calls custom Jasmine matchers
+    let exp: any = expect(p);
+    exp.toBePromiseLike();
   });
 
 
@@ -75,7 +77,9 @@ describe('async', function()
     var injector = new Injector();
     var p = injector.getPromise(SynchronousUserList);
 
-    expect(p).toBePromiseLike();
+    // The trick for TypeScript when we calls custom Jasmine matchers
+    let exp: any = expect(p);
+    exp.toBePromiseLike();
   });
 
 
@@ -86,7 +90,9 @@ describe('async', function()
     var p1 = injector.getPromise(SynchronousUserList);
     var p2 = injector.getPromise(SynchronousUserList);
 
-    expect(p2).toBePromiseLike();
+    // The trick for TypeScript when we calls custom Jasmine matchers
+    let exp: any = expect(p2);
+    exp.toBePromiseLike();
   });
 
 
@@ -95,9 +101,14 @@ describe('async', function()
     var injector = new Injector([FetchUsers]);
 
     injector.getPromise(UserController)
-    .then(function(userController) {
-      expect(userController).toBeInstanceOf(UserController);
-      expect(userController.list).toBeInstanceOf(UserList);
+    .then(function(userController)
+    {
+      // The trick for TypeScript when we calls custom Jasmine matchers
+      let exp: any = expect(userController);
+      exp.toBeInstanceOf(UserController);
+
+      let exp2: any = expect(userController.list);
+      exp2.toBeInstanceOf(UserList);
       done();
     });
   });
@@ -109,7 +120,9 @@ describe('async', function()
     var injector = new Injector([SynchronousUserList]);
     var childInjector = injector.createChild([])
 
-    expect(childInjector.getPromise(SynchronousUserList)).toBePromiseLike();
+    // The trick for TypeScript when we calls custom Jasmine matchers
+    let exp: any = expect(childInjector.getPromise(SynchronousUserList));
+    exp.toBePromiseLike();
   });
 
 
@@ -127,8 +140,12 @@ describe('async', function()
     var injector = new Injector([FetchUsers]);
     var controller = injector.get(SmartUserController);
 
-    expect(controller).toBeInstanceOf(SmartUserController);
-    expect(controller.promise).toBePromiseLike();
+    // The trick for TypeScript when we calls custom Jasmine matchers
+    let exp: any = expect(controller);
+    exp.toBeInstanceOf(SmartUserController);
+
+    let exp2: any = expect(controller.promise);
+    exp2.toBePromiseLike();
   });
 
 
@@ -165,8 +182,12 @@ describe('async', function()
 
     injector.getPromise(ChildUserController).then(function(childUserController)
     {
-      expect(childUserController).toBeInstanceOf(ChildUserController);
-      expect(childUserController.list).toBeInstanceOf(UserList);
+      // The trick for TypeScript when we calls custom Jasmine matchers
+      let exp: any = expect(childUserController);
+      exp.toBeInstanceOf(ChildUserController);
+
+      let exp2: any = expect(childUserController.list);
+      exp2.toBeInstanceOf(UserList);
       done();
     });
   });
