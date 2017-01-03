@@ -168,8 +168,10 @@ export class Injector
    */
   get<T>(token: ClassInterface<T>, resolving?: ClassInterface<T>[]): T;
   get(token: ClassInterface<this>, resolving?: ClassInterface<this>[]): this;
-  get<T>(token: ClassInterface<T>, resolving?: ClassInterface<T>[], wantPromise?: boolean): T | Promise<T>;
-  get(token: ClassInterface<this>, resolving?: ClassInterface<this>[], wantPromise?: boolean): this | Promise<this>;
+  get<T>(token: ClassInterface<T>, resolving?: ClassInterface<T>[], wantPromise?: false): T;
+  get<T>(token: ClassInterface<T>, resolving?: ClassInterface<T>[], wantPromise?: true): Promise<T>;
+  get(token: ClassInterface<this>, resolving?: ClassInterface<this>[], wantPromise?: false): this;
+  get(token: ClassInterface<this>, resolving?: ClassInterface<this>[], wantPromise?: true): Promise<this>;
   get<T>(token: ClassInterface<T>, resolving?: ClassInterface<T>[], wantPromise?: boolean, wantLazy?: boolean): T | Promise<T> | Function;
   get(token: ClassInterface<this>, resolving?: ClassInterface<this>[], wantPromise?: boolean, wantLazy?: boolean): this | Promise<this> | Function;
   get<T>(token: ClassInterface<T | this>, resolving: ClassInterface<T | this>[] = [], wantPromise = false, wantLazy = false): T | this | Promise<T | this> | Function
@@ -370,9 +372,9 @@ export class Injector
   }
 
 
-  getPromise<T>(token: ClassInterface<T>): T;
-  getPromise<T>(token: ClassInterface<this>): this;
-  getPromise<T>(token: ClassInterface<T | this>)
+  getPromise<T>(token: ClassInterface<T>): Promise<T>;
+  getPromise<T>(token: ClassInterface<this>): Promise<this>;
+  getPromise<T>(token: ClassInterface<T | this>): Promise<T | this>
   {
     return this.get(token, [], true);
   }
