@@ -1,36 +1,29 @@
 // A bunch of helper functions.
 
-export function isUpperCase(char: any)
-{
+export function isUpperCase(char: any): boolean {
   return char.toUpperCase() === char;
 }
 
-export function isFunction(value: any)
-{
+export function isFunction(value: any): boolean {
   return typeof value === 'function';
 }
 
 
-export function isObject(value: any)
-{
+export function isObject(value: any): boolean {
   return typeof value === 'object';
 }
 
 
-export function toString(token: any)
-{
-  if(typeof token === 'string')
-  {
+export function toString(token: any): string {
+  if (typeof token === 'string') {
     return token;
   }
 
-  if(token === undefined || token === null)
-  {
+  if (token === undefined || token === null) {
     return '' + token;
   }
 
-  if(token.name)
-  {
+  if (token.name) {
     return token.name;
   }
 
@@ -38,16 +31,15 @@ export function toString(token: any)
 }
 
 export let ownKeys =
-(
-  this
-  && this.Reflect
-  && Reflect.ownKeys ? Reflect.ownKeys : function (O: any)
-  {
-    let keys = Object.getOwnPropertyNames(O);
+  (
+    this
+    && this.Reflect
+    && Reflect.ownKeys ? Reflect.ownKeys : (O: any) => {
+        const keys = Object.getOwnPropertyNames(O);
 
-    if( Object.getOwnPropertySymbols )
-      return keys.concat( Object.getOwnPropertySymbols(O).toString() );
-    
-    return keys;
-  }
-);
+        if (Object.getOwnPropertySymbols)
+          return keys.concat(Object.getOwnPropertySymbols(O).toString());
+
+        return keys;
+      }
+  );

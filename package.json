@@ -1,5 +1,5 @@
 {
-  "name": "ts-di",
+  "name": "di-typescript",
   "version": "1.0.13",
   "description": "A DI framework, fork from angular/di.js",
   "main": "dist/index",
@@ -7,22 +7,32 @@
     "lib": "src"
   },
   "format": "es2015",
-  "homepage": "https://github.com/KostyaTretyak/ts-di",
+  "homepage": "https://github.com/RobinBuschmann/ts-di",
   "repository": {
     "type": "git",
-    "url": "git://github.com/KostyaTretyak/ts-di.git"
+    "url": "git://github.com/RobinBuschmann/ts-di.git"
   },
   "bugs": {
-    "url": "https://github.com/KostyaTretyak/ts-di/issues"
+    "url": "https://github.com/RobinBuschmann/ts-di/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/reflect-metadata": "0.0.5"
+  },
   "devDependencies": {
-    "@types/jasmine": "^2.5.38",
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.37",
     "@types/node": "^6.0.52",
-    "typescript": "^2.1.4"
+    "tslint": "^4.3.1",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "typescript": "^2.1.4",
+    "reflect-metadata": "^0.1.8"
+  },
+  "peerDependencies": {
+    "reflect-metadata": "^0.1.8"
   },
   "scripts": {
-    "test": "jasmine"
+    "test": "mocha"
   },
   "keywords": [
     "di",
@@ -31,5 +41,9 @@
     "angular-di"
   ],
   "author": "Vojta Jína <vojta.jina@gmail.com>",
+  "contributors": [
+    "Kostya Tretyak",
+    "Robin Buschmann <robin.buschmann@hotmail.de>"
+  ],
   "license": "Apache-2.0"
 }

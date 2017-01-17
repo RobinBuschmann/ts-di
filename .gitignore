@@ -3,3 +3,5 @@ dist
 ts-di-*
 npm-debug.log
 .vscode
+.DS_Store
+.idea

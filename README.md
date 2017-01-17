@@ -1,14 +1,12 @@
-[![Build Status](https://travis-ci.org/KostyaTretyak/ts-di.png?branch=master)](https://travis-ci.org/KostyaTretyak/ts-di)
+[![Build Status](https://travis-ci.org/RobinBuschmann/ts-di.png?branch=master)](https://travis-ci.org/RobinBuschmann/ts-di)
 
 ## Dependency Injection
 
-This fork - it's just version TypeScript [Angular di.js](https://github.com/angular/di.js).
+This is a fork of KostyaTretyak's [ts-di](https://github.com/KostyaTretyak/ts-di).
 
 ### Install
 
-```bash
-npm install ts-di --save
-```
+TODO
 
 ## Examples resolve dependency
 
@@ -22,7 +20,7 @@ import {Inject} from 'ts-di';
 class A{}
 
 // All dependencies in @Inject listed separated by commas
-@Inject(A)
+@Inject
 class B
 {
   constructor(private a: A){}
@@ -72,8 +70,15 @@ let instance = injector.get(B);
 Now supports five decorators:
 - For resolving chain dependencies:
   - `@Inject`
+    - `@asPromise`
+    - `@asLazy`
   - `@InjectPromise`
   - `@InjectLazy`
 - For resolving single dependency (useful for testing):
   - `@Provide`
   - `@ProvidePromise`
+
+## Compared to KostyaTretyak's ts-di 
+This version uses [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) to store the meta information
+provided by the decorators. Another benefit from reflect-metadata is, that `Inject` don't need parameters anymore - 
+It now retrieves the dependencies through the `design:paramtypes meta information.

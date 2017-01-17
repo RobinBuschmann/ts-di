@@ -5,14 +5,11 @@ import {Injector} from './injector';
 let IS_DEBUG = false;
 let _global: any = null;
 
-if(typeof process === 'object' && process.env)
-{
+if (typeof process === 'object' && process.env) {
   // Node.js
   IS_DEBUG = !!process.env['DEBUG'];
   _global = global;
-}
-else if(typeof location === 'object' && location.search)
-{
+} else if (typeof location === 'object' && location.search) {
   // Browser
   IS_DEBUG = /di_debug/.test(location.search);
   _global = window;
@@ -20,30 +17,23 @@ else if(typeof location === 'object' && location.search)
 
 
 let globalCounter = 0;
-function getUniqueId()
-{
-  return ++globalCounter;
-}
+const getUniqueId = () => ++globalCounter;
 
 
-function serializeToken(token: any, tokens: any)
-{
-  if(!tokens.has(token))
-  {
+function serializeToken(token: any, tokens: any): string {
+  if (!tokens.has(token)) {
     tokens.set(token, getUniqueId().toString());
   }
 
   return tokens.get(token);
 }
 
-function serializeProvider(provider: any, key: string, tokens: any)
-{
+function serializeProvider(provider: any, key: string, tokens: any): any {
   return {
     id: serializeToken(key, tokens),
     name: toString(key),
     isPromise: provider.isPromise,
-    dependencies: provider.params.map( (param: any) =>
-    {
+    dependencies: provider.params.map((param: any) => {
       return {
         token: serializeToken(param.token, tokens),
         isPromise: param.isPromise,
@@ -54,27 +44,23 @@ function serializeProvider(provider: any, key: string, tokens: any)
 }
 
 
-function serializeInjector(injector: any, tokens: any, Injector: Injector)
-{
-  let serializedInjector: any =
-  {
+function serializeInjector(injector: any, tokens: any, Injector: Injector): any {
+  const serializedInjector: any = {
     id: serializeToken(injector, tokens),
     parent_id: injector._parent ? serializeToken(injector._parent, tokens) : null,
     providers: {}
   };
 
-  let injectorClassId = serializeToken(Injector, tokens);
-  serializedInjector.providers[injectorClassId] =
-  {
+  const injectorClassId = serializeToken(Injector, tokens);
+  serializedInjector.providers[injectorClassId] = {
     id: injectorClassId,
     name: toString(Injector),
     isPromise: false,
     dependencies: []
   };
 
-  injector._providers.forEach(function(provider: any, key: string)
-  {
-    let serializedProvider = serializeProvider(provider, key, tokens);
+  injector._providers.forEach((provider: any, key: string) => {
+    const serializedProvider = serializeProvider(provider, key, tokens);
     serializedInjector.providers[serializedProvider.id] = serializedProvider;
   });
 
@@ -82,20 +68,16 @@ function serializeInjector(injector: any, tokens: any, Injector: Injector)
 }
 
 
-export function profileInjector(injector: Injector, Injector: any)
-{
-  if(!IS_DEBUG)
-  {
+export function profileInjector(injector: Injector, Injector: any): void {
+  if (!IS_DEBUG) {
     return;
   }
 
-  if(!_global.__di_dump__)
-  {
-    _global.__di_dump__ =
-    {
-      injectors: [],
-      tokens: new Map()
-    };
+  if (!_global.__di_dump__) {
+    _global.__di_dump__ = {
+        injectors: [],
+        tokens: new Map()
+      };
   }
 
   _global.__di_dump__.injectors.push(serializeInjector(injector, _global.__di_dump__.tokens, Injector));

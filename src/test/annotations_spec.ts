@@ -1,232 +1,239 @@
+import {expect} from 'chai';
 import {
-  hasAnnotation,
   readAnnotations,
   Inject,
-  InjectLazy,
-  InjectPromise,
   Provide,
   ProvidePromise,
   InjectDecorator,
-  annotate
+  annotate,
+  asPromise,
+  asLazy
 } from '../annotations';
 import {Injector} from '../injector';
 
-describe('readAnnotations', function()
-{
-  it('should read @Provide', function()
-  {
-    class Bar {}
+describe('readAnnotations', () => {
 
-    @Provide(Bar)
-    class Foo {}
-
-    let annotations = readAnnotations(Foo);
-
-    expect(annotations.provide.token).toBe(Bar);
-    expect(annotations.provide.isPromise).toBe(false);
-  });
-
-
-  it('should read @ProvidePromise', function()
-  {
-    class Bar {}
-
-    @ProvidePromise(Bar)
-    class Foo {}
-
-    let annotations = readAnnotations(Foo);
-
-    expect(annotations.provide.token).toBe(Bar);
-    expect(annotations.provide.isPromise).toBe(true);
-  });
-
-
-  it('should read @Inject', function()
-  {
-    class One {}
-    class Two {}
-
-    @Inject(One, Two)
-    class Foo {}
-
-    let annotations = readAnnotations(Foo);
-
-    expect(annotations.params[0].token).toBe(One);
-    expect(annotations.params[0].isPromise).toBe(false);
-    expect(annotations.params[0].isLazy).toBe(false);
-
-    expect(annotations.params[1].token).toBe(Two);
-    expect(annotations.params[1].isPromise).toBe(false);
-    expect(annotations.params[1].isLazy).toBe(false);
-  });
-
-
-  it('should read type annotations', function() {
-    class One {}
-    class Two {}
-
-    class Foo {
-      constructor(one: One, two: Two) {}
+  it('should read @Provide', () => {
+    class Bar {
     }
 
-    annotate( Foo, new InjectDecorator(One, Two) );
+    @Provide(Bar)
+    class Foo {
+    }
 
-    let annotations = readAnnotations(Foo);
+    const annotations = readAnnotations(Foo);
 
-    expect(annotations.params[0].token).toBe(One);
-    expect(annotations.params[0].isPromise).toBe(false);
-    expect(annotations.params[0].isLazy).toBe(false);
-
-    expect(annotations.params[1].token).toBe(Two);
-    expect(annotations.params[1].isPromise).toBe(false);
-    expect(annotations.params[1].isLazy).toBe(false);
+    expect(annotations.provide.token).to.equal(Bar);
+    expect(annotations.provide.isPromise).to.be.false;
   });
 
-  it('should read stacked @Inject{Lazy, Promise} annotations', function() {
-    class One {}
-    class Two {}
-    class Three {}
+  it('should read @ProvidePromise', () => {
+    class Bar {
+    }
 
-    @Inject(One)
-    @InjectLazy(Two)
-    @InjectPromise(Three)
-    class Foo {}
+    @ProvidePromise(Bar)
+    class Foo {
+    }
 
-    let annotations = readAnnotations(Foo);
+    const annotations = readAnnotations(Foo);
 
-    expect(annotations.params[0].token).toBe(One);
-    expect(annotations.params[0].isPromise).toBe(false);
-    expect(annotations.params[0].isLazy).toBe(false);
+    expect(annotations.provide.token).to.equal(Bar);
+    expect(annotations.provide.isPromise).to.be.true;
+  });
 
-    expect(annotations.params[1].token).toBe(Two);
-    expect(annotations.params[1].isPromise).toBe(false);
-    expect(annotations.params[1].isLazy).toBe(true);
 
-    expect(annotations.params[2].token).toBe(Three);
-    expect(annotations.params[2].isPromise).toBe(true);
-    expect(annotations.params[2].isLazy).toBe(false);
+  it('should read @Inject', () => {
+    class One {
+    }
+    class Two {
+    }
+
+    @Inject
+    class Foo {
+
+      constructor(one: One, two: Two) {
+      }
+    }
+
+    const annotations = readAnnotations(Foo);
+
+    expect(annotations.params[0].token).to.equal(One);
+    expect(annotations.params[0].isPromise).to.equal(false);
+    expect(annotations.params[0].isLazy).to.equal(false);
+
+    expect(annotations.params[1].token).to.equal(Two);
+    expect(annotations.params[1].isPromise).to.equal(false);
+    expect(annotations.params[1].isLazy).to.equal(false);
+  });
+
+
+  it('should read type annotations of class and instance', () => {
+    class One {
+    }
+    class Two {
+    }
+
+    class Foo {
+      constructor(one: One, two: Two) {
+      }
+    }
+
+    annotate(Foo, new InjectDecorator(One, Two));
+
+    [Foo, injector.get(Foo)].forEach(target => {
+
+      const annotations = readAnnotations(target);
+
+      expect(annotations.params[0].token).to.equal(One);
+      expect(annotations.params[0].isPromise).to.equal(false);
+      expect(annotations.params[0].isLazy).to.equal(false);
+
+      expect(annotations.params[1].token).to.equal(Two);
+      expect(annotations.params[1].isPromise).to.equal(false);
+      expect(annotations.params[1].isLazy).to.equal(false);
+    });
+  });
+
+  it('should read stacked @Inject annotations of class and instance', () => {
+    class One {
+    }
+    class Two {
+    }
+    class Three {
+    }
+
+    @Inject
+    class Foo {
+
+      constructor(one: One,
+                  @asLazy(Two) two: Two,
+                  @asPromise(Three) three: Promise<Three>) {
+
+      }
+    }
+
+    [Foo, injector.get(Foo)].forEach(target => {
+
+      const annotations = readAnnotations(target);
+
+      expect(annotations.params[0].token).to.equal(One);
+      expect(annotations.params[0].isPromise).to.equal(false);
+      expect(annotations.params[0].isLazy).to.equal(false);
+
+      expect(annotations.params[1].token).to.equal(Two);
+      expect(annotations.params[1].isPromise).to.equal(false);
+      expect(annotations.params[1].isLazy).to.equal(true);
+
+      expect(annotations.params[2].token).to.equal(Three);
+      expect(annotations.params[2].isPromise).to.equal(true);
+      expect(annotations.params[2].isLazy).to.equal(false);
+    });
   });
 });
 
-let injector = new Injector();
+const injector = new Injector();
 
-let msg = 'this is message from property of class A';
+const msg = 'this is message from property of class A';
 
-class A
-{
+class A {
   message = msg;
 }
 
-describe(`@Inject`, () =>
-{
-  @Inject(A)
-  class B
-  {
+describe(`@Inject`, () => {
+  @Inject
+  class B {
     message = '';
 
-    constructor(instanceA: A)
-    {
+    constructor(public instanceA: A) {
       this.message = instanceA.message;
     }
   }
 
-  class Bb{}
+  class Bb {
+  }
 
-  @Inject(B, Bb)
-  class C
-  {
+  @Inject
+  class C {
     message = '';
 
-    constructor(instanceB: B, instanceBb: Bb)
-    {
+    constructor(public instanceB: B,
+                @asLazy(Bb) public bbFactory: () => Bb) {
       this.message = instanceB.message;
     }
 
-    getValue = () =>
-    {
+    getValue = () => {
       return this.message;
     }
   }
 
-  let instanceC = injector.get(C);
+  const instanceC = injector.get(C);
 
-  it(`should create instance of C`, () =>
-  {
-    let obj = (new C (new B (new A), new Bb));
+  it(`should create instance of C`, () => {
+    const obj = new C(new B(new A()), () => new Bb());
 
-    expect( instanceC.toString() ).toEqual( obj.toString() )
+    expect(instanceC.toString()).to.eql(obj.toString());
+    expect(instanceC.instanceB).to.be.an.instanceof(B);
+    expect(instanceC.bbFactory()).to.be.an.instanceof(Bb);
+    expect(instanceC.instanceB.instanceA).to.be.an.instanceof(A);
   });
 
-  it(`should not to throw during call C.getValue()`, () =>
-  {
-    expect(instanceC.getValue).not.toThrow();
+  it(`should not to throw during call C.getValue()`, () => {
+    expect(instanceC.getValue).not.to.throw();
   });
 
-  it(`should be not empty`, () =>
-  {
-    expect( instanceC.getValue().length ).toBeGreaterThan(0)
+  it(`should be not empty`, () => {
+    expect(instanceC.getValue().length).to.be.greaterThan(0);
   });
 
-  it(`should to return message from class A`, () =>
-  {
-    expect( instanceC.getValue() ).toEqual( msg );
+  it(`should to return message from class A`, () => {
+    expect(instanceC.getValue()).to.eql(msg);
   });
 
 });
 
-describe(`annotate()`, () =>
-{
-  class B
-  {
+describe(`annotate()`, () => {
+  class B {
     message = '';
 
-    constructor(instanceA: A)
-    {
+    constructor(instanceA: A) {
       this.message = instanceA.message;
     }
   }
 
-  annotate( B, new InjectDecorator(A) );
+  annotate(B, new InjectDecorator(A));
 
-  class C
-  {
+  class C {
     message = '';
 
-    constructor(instanceB: B)
-    {
+    constructor(instanceB: B) {
       this.message = instanceB.message;
     }
 
-    getValue = () =>
-    {
+    getValue = () => {
       return this.message;
     }
   }
 
-  annotate( C, new InjectDecorator(B) );
+  annotate(C, new InjectDecorator(B));
 
-  let instanceC = injector.get(C);
+  const instanceC = injector.get(C);
 
-  it(`should create instance of C`, () =>
-  {
-    let obj = (new C (new B (new A)));
+  it(`should create instance of C`, () => {
+    const obj = new C(new B(new A()));
 
-    expect( instanceC.toString() ).toEqual( obj.toString() )
+    expect(instanceC.toString()).to.eql(obj.toString());
   });
 
-  it(`should not to throw during call C.getValue()`, () =>
-  {
-    expect(instanceC.getValue).not.toThrow();
+  it(`should not to throw during call C.getValue()`, () => {
+    expect(instanceC.getValue).not.to.throw();
   });
 
-  it(`should be not empty`, () =>
-  {
-    expect( instanceC.getValue().length ).toBeGreaterThan(0)
+  it(`should be not empty`, () => {
+    expect(instanceC.getValue().length).to.be.greaterThan(0);
   });
 
-  it(`should to return message from class A`, () =>
-  {
-    expect( instanceC.getValue() ).toEqual( msg );
+  it(`should to return message from class A`, () => {
+    expect(instanceC.getValue()).to.eql(msg);
   });
 
 });

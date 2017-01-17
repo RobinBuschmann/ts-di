@@ -13,6 +13,8 @@ export {
   ClassProvider,
   FactoryProvider,
   Inject,
+  asPromise,
+  asLazy,
   InjectPromise,
   InjectLazy,
   Provide,
