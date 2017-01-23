@@ -32,6 +32,8 @@
     "reflect-metadata": "^0.1.8"
   },
   "scripts": {
+    "build": "tsc",
+    "pretest": "npm run build",
     "test": "mocha dist/test/**/*.js"
   },
   "keywords": [
