@@ -6,3 +6,5 @@ npm-debug.log
 tsconfig.json
 test
 .vscode
+.DS_Store
+.idea
