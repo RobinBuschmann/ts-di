@@ -7,17 +7,13 @@ di-typescript is a simple dependency injection framework, which is build upon
 [angular/di.js](https://github.com/angular/di.js). 
 
 ## Install
-
 ```
 npm install di-typescript --save
 ```
 
 ## Usage
-
-Inject instance of class `A` for constructor of class `B`:
-
 ### Using `@Inject` and create an instance
-
+The following shows how to inject an instance of `UserService` into the constructor of `App`.
 ```typescript
 import {Inject, Injector} from 'di-typescript';
 
@@ -31,12 +27,14 @@ class App
 }
 
 const injector = new Injector();
-const app = injector.get(App); // resolves userService for us
+// resolves UserService by creating an instance or retrieves it, when already exists
+const app = injector.get(App); 
 
 ```
 
 ### Using factories and tokens
-
+If a dependency should not been resolved from a class but a function or a simple value,
+`@useFactory` or `@useToken` can be used like: 
 ```typescript
 import {Inject, createToken, useToken, useFactory} from 'di-typescript';
 
@@ -63,6 +61,8 @@ const app = injector.get(App);
 ```
 
 ### Testing and providing different values for specific tokens
+When it comes to testing and further a mock should be injected than the actual service,
+this can be achieved as the following.
 
 ```typescript
 
