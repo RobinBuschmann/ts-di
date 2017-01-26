@@ -149,7 +149,7 @@ export class Injector {
       provider = new ClassProvider(classModule.useClass, annotations.params, isPromise);
     }
 
-    this.providers.set(module.provide, provider);
+    this.providers.set(token, provider);
   }
 
   /**
