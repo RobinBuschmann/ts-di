@@ -7,9 +7,10 @@ import {
   InjectDecorator,
   annotate,
   asPromise,
-  asLazy
-} from '../annotations';
-import {Injector} from '../injector';
+  asLazy, useFactory, useToken
+} from '../lib/annotations';
+import {Injector, Module} from '../lib/injector';
+import {createToken, getErrorMessage} from "../lib/opaqueToken";
 
 describe('readAnnotations', () => {
 
@@ -41,7 +42,6 @@ describe('readAnnotations', () => {
     expect(annotations.provide.isPromise).to.be.true;
   });
 
-
   it('should read @Inject', () => {
     class One {
     }
@@ -65,7 +65,6 @@ describe('readAnnotations', () => {
     expect(annotations.params[1].isPromise).to.equal(false);
     expect(annotations.params[1].isLazy).to.equal(false);
   });
-
 
   it('should read type annotations of class and instance', () => {
     class One {
@@ -140,6 +139,10 @@ class A {
 }
 
 describe(`@Inject`, () => {
+
+  const COOL_VALUE = 'cool';
+  const bbFactory = () => new Bb();
+
   @Inject
   class B {
     message = '';
@@ -157,7 +160,11 @@ describe(`@Inject`, () => {
     message = '';
 
     constructor(public instanceB: B,
-                @asLazy(Bb) public bbFactory: () => Bb) {
+                dummyA: any,
+                @asLazy(Bb) public lazyBb: () => Bb,
+                @useFactory(() => COOL_VALUE) public coolValue: string,
+                @useFactory(bbFactory) public bbFromFactory: Bb,
+                dummyB?: any) {
       this.message = instanceB.message;
     }
 
@@ -166,14 +173,23 @@ describe(`@Inject`, () => {
     }
   }
 
+  @Inject
+  class D {
+    constructor(@useFactory(bbFactory) public bbFromFactory: Bb) {
+    }
+  }
+
   const instanceC = injector.get(C);
+  const instanceD = injector.get(D);
 
   it(`should create instance of C`, () => {
-    const obj = new C(new B(new A()), () => new Bb());
+    const obj = new C(new B(new A()), '', () => new Bb(), COOL_VALUE, new Bb());
 
     expect(instanceC.toString()).to.eql(obj.toString());
     expect(instanceC.instanceB).to.be.an.instanceof(B);
-    expect(instanceC.bbFactory()).to.be.an.instanceof(Bb);
+    expect(instanceC.coolValue).to.equals(COOL_VALUE);
+    expect(instanceC.lazyBb()).to.be.an.instanceof(Bb);
+    expect(instanceC.bbFromFactory).to.be.an.instanceof(Bb);
     expect(instanceC.instanceB.instanceA).to.be.an.instanceof(A);
   });
 
@@ -187,6 +203,70 @@ describe(`@Inject`, () => {
 
   it(`should to return message from class A`, () => {
     expect(instanceC.getValue()).to.eql(msg);
+  });
+
+  it(`should cache factory data`, () => {
+
+    expect(instanceC.bbFromFactory === instanceD.bbFromFactory).to.be.true;
+  });
+
+});
+
+describe(`useClass, useFactory, useValue`, () => {
+
+  class A {
+  }
+  class AMock {
+  }
+
+  class B {
+    source = 'origin';
+  }
+  const bMock: B = {source: 'bMock'};
+
+  class C {
+    source = 'origin';
+  }
+  const cMock: C = {source: 'cMock'};
+  const cMockFactory: (() => C) = () => cMock;
+
+  const prodConfig = 'prod';
+  const configToken = createToken('config.token');
+
+  @Inject
+  class Service {
+
+    constructor(public a: A,
+                public b: B,
+                public c: C,
+                @useToken(configToken) public config: string) {
+
+    }
+  }
+
+  const modules: Module[] = [
+    {provide: A, useClass: AMock},
+    {provide: B, useValue: bMock},
+    {provide: C, useFactory: cMockFactory},
+  ];
+
+  it(`should should throw an error`, () => {
+    const _injector = new Injector(modules);
+
+    expect(() => _injector.get(Service)).to.throw(getErrorMessage('config.token'));
+  });
+
+  it(`should use mock data`, () => {
+
+    modules.push({provide: configToken, useValue: prodConfig});
+
+    const _injector = new Injector(modules);
+    const service = _injector.get(Service);
+
+    expect(service.a).to.be.an.instanceof(AMock);
+    expect(service.b).to.be.equal(bMock);
+    expect(service.c).to.be.equal(cMock);
+    expect(service.config).to.be.equal(prodConfig);
   });
 
 });

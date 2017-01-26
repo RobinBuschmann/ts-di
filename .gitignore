@@ -1,5 +1,7 @@
 node_modules
-dist
+**/*.js
+**/*.js.map
+**/*.d.ts
 ts-di-*
 npm-debug.log
 .vscode

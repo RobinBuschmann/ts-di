@@ -3,14 +3,13 @@ import {
   ProvidePromise,
   InjectPromise,
   Inject,
-  TransientScope,
-  InjectDecorator, asPromise
-} from '../annotations';
-import {Injector} from '../injector';
+  asPromise
+} from '../lib/annotations';
+import {Injector} from '../lib/injector';
 
 
 class UserList {
-  someProp: number;
+
 }
 
 // An async provider.
@@ -46,18 +45,19 @@ class SmartUserListController {
 describe('async', () => {
 
   it('should return a promise', () => {
-    const injector = new Injector([FetchUsers]);
+    const injector = new Injector([{provide: UserList, useClass: FetchUsers}]);
     const p = injector.getPromise(UserList);
 
-    // The trick for TypeScript when we calls custom Jasmine matchers
-    // expect(p).to.be.;
+    expect(p).to.be.have.property('then');
   });
 
 
   it('should throw when instantiating promise provider synchronously', () => {
-    const injector = new Injector([FetchUsers]);
+    const injector = new Injector([{provide: UserList, useClass: FetchUsers}]);
 
-    expect(() => injector.get(UserList))
+    expect(() => {
+      injector.get(UserList);
+    })
       .to.throw('Cannot instantiate UserList synchronously. It is provided as a promise!');
   });
 
@@ -83,7 +83,7 @@ describe('async', () => {
 
   it('should return promise when a dependency is async', () =>
 
-    new Injector([FetchUsers]).getPromise(UserController)
+    new Injector([{provide: UserList, useClass: FetchUsers}]).getPromise(UserController)
       .then((userController) => {
 
         expect(userController).to.be.an.instanceof(UserController);
@@ -102,7 +102,7 @@ describe('async', () => {
 
 
   it('should throw when a dependency is async', () => {
-    const injector = new Injector([FetchUsers]);
+    const injector = new Injector([{provide: UserList, useClass: FetchUsers}]);
 
     expect(() => injector.get(UserController))
       .to.throw('Cannot instantiate UserList synchronously. It is provided as a promise! (UserController -> UserList)');
@@ -110,7 +110,7 @@ describe('async', () => {
 
 
   it('should resolve synchronously when async dependency requested as a promise', () => {
-    const injector = new Injector([FetchUsers]);
+    const injector = new Injector([{provide: UserList, useClass: FetchUsers}]);
     const controller = injector.get(SmartUserController);
     const listController = injector.get(SmartUserListController);
 
@@ -149,7 +149,7 @@ describe('async', () => {
 
   it('should allow async dependency in a parent constructor', () => {
     class ChildUserController extends UserController {}
-    const injector = new Injector([FetchUsers]);
+    const injector = new Injector([{provide: UserList, useClass: FetchUsers}]);
 
     return injector.getPromise(ChildUserController).then((childUserController) => {
 

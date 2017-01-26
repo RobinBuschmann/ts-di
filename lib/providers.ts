@@ -6,12 +6,13 @@ import {
   hasAnnotation
 } from './annotations';
 import {isFunction, isObject, toString, isUpperCase, ownKeys} from './util';
+import {isFactory} from "./metadata";
 
-function isClass(clsOrFunction: any): boolean {
+export function isClass(clsOrFunction: any): boolean {
 
   if (hasAnnotation(clsOrFunction, ClassProviderAnnotation)) {
     return true;
-  } else if (hasAnnotation(clsOrFunction, FactoryProviderAnnotation)) {
+  } else if (isFactory(clsOrFunction) || hasAnnotation(clsOrFunction, FactoryProviderAnnotation)) {
     return false;
 
     /* When code is minified, class names are no longer upper case, so we skip this check
@@ -19,7 +20,7 @@ function isClass(clsOrFunction: any): boolean {
   } else if (clsOrFunction.name && clsOrFunction.name.length && clsOrFunction.name.length > 3) {
     return isUpperCase(clsOrFunction.name.charAt(0));
   }
-  return ownKeys(clsOrFunction.prototype).length > 0;
+  return clsOrFunction.prototype && ownKeys(clsOrFunction.prototype).length > 0;
 }
 
 // Provider is responsible for creating instances.
@@ -61,7 +62,7 @@ export class ClassProvider {
     this.params = [];
     this._constructors = [];
 
-    this._flattenParams(clazz, params);
+    this.flattenParams(clazz, params);
     this._constructors.unshift([clazz, 0, this.params.length - 1]);
   }
 
@@ -74,7 +75,7 @@ export class ClassProvider {
    * but it is only called during the constructor.
    * @todo(vojta): remove the annotations argument?
    */
-  protected _flattenParams(constructor: any, params: any): void {
+  protected flattenParams(constructor: any, params: any): void {
     let SuperConstructor;
     let constructorInfo;
 
@@ -89,7 +90,7 @@ export class ClassProvider {
 
         constructorInfo = [SuperConstructor, this.params.length];
         this._constructors.push(constructorInfo);
-        this._flattenParams(SuperConstructor, readAnnotations(SuperConstructor).params);
+        this.flattenParams(SuperConstructor, readAnnotations(SuperConstructor).params);
         constructorInfo.push(this.params.length - 1);
 
       } else {
@@ -103,9 +104,9 @@ export class ClassProvider {
    * We get arguments for all the constructors as a single flat array.
    * This method generates pre-bound "superConstructor" wrapper with correctly passing arguments.
    */
-  protected _createConstructor(currentConstructorIdx: any,
-                               context: any,
-                               allArguments: any[]): Function {
+  protected createConstructor(currentConstructorIdx: any,
+                              context: any,
+                              allArguments: any[]): Function {
     const constructorInfo = this._constructors[currentConstructorIdx];
     const nextConstructorInfo = this._constructors[currentConstructorIdx + 1];
     let argsForCurrentConstructor: any[];
@@ -113,7 +114,7 @@ export class ClassProvider {
     if (nextConstructorInfo) {
       argsForCurrentConstructor = allArguments
         .slice(constructorInfo[1], nextConstructorInfo[1])
-        .concat([this._createConstructor(currentConstructorIdx + 1, context, allArguments)])
+        .concat([this.createConstructor(currentConstructorIdx + 1, context, allArguments)])
         .concat(allArguments.slice(nextConstructorInfo[2] + 1, constructorInfo[2] + 1));
     } else {
       argsForCurrentConstructor = allArguments.slice(constructorInfo[1], constructorInfo[2] + 1);
@@ -128,7 +129,7 @@ export class ClassProvider {
   // It is called by injector to create an instance.
   create(args: any): any {
     const context = Object.create(this.provider.prototype);
-    const constructor = this._createConstructor(0, context, args);
+    const constructor = this.createConstructor(0, context, args);
     const returnedValue = constructor();
 
     if (isFunction(returnedValue) || isObject(returnedValue)) {
@@ -166,12 +167,42 @@ export class FactoryProvider {
   }
 }
 
+/**
+ * ValueProvider knows how to create instance from a factory function.
+ * - all the state is immutable
+ */
+export class ValueProvider {
+  provider: any;
+  params: any;
+  isPromise: boolean;
+
+  constructor(value: any, params: any, isPromise: boolean) {
+    this.provider = value;
+    this.params = params;
+    this.isPromise = isPromise;
+
+    for (const param of params) {
+      if (param.token === SuperConstructorAnnotation) {
+        throw new Error(`${toString(value)} is not a class. Only classes with a parent can ask for SuperConstructor!`);
+      }
+    }
+  }
+
+  create(args: any): any {
+
+    return this.provider;
+  }
+}
+
 
 export function createProviderFromFnOrClass(fnOrClass: any, annotations: any): ClassProvider|FactoryProvider {
 
   if (isClass(fnOrClass)) {
     return new ClassProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
+  } else if (isFunction(fnOrClass)) {
+
+    return new FactoryProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
   }
 
-  return new FactoryProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
+  return new ValueProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
 }

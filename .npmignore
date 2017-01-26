@@ -4,5 +4,5 @@ npm-debug.log
 .travis.yml
 .gitignore
 tsconfig.json
-dist/test
+test
 .vscode

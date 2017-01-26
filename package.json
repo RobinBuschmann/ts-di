@@ -1,8 +1,8 @@
 {
   "name": "di-typescript",
-  "version": "1.0.13",
-  "description": "A DI framework, fork from angular/di.js",
-  "main": "dist/index",
+  "version": "1.1.0",
+  "description": "A simple DI framework (fork from angular/di.js)",
+  "main": "index.js",
   "directories": {
     "lib": "src"
   },
@@ -34,7 +34,7 @@
   "scripts": {
     "build": "tsc",
     "pretest": "npm run build",
-    "test": "mocha dist/test/**/*.js"
+    "test": "mocha test/**/*.js"
   },
   "keywords": [
     "di",

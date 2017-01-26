@@ -1,23 +1,17 @@
 import 'reflect-metadata';
-import {isFunction} from './util';
+import {
+  getPromiseMeta, getLazyMeta, setPromiseMeta, setLazyMeta, getAnnotations, setAnnotations,
+  getFactoryMeta, setFactoryMeta, markAsFactory
+} from "./metadata";
 
 // This module contains:
 // - built-in annotation classes
 // - helpers to read/write annotations
 
-const ANNOTATIONS_META_KEY = 'di:annotations';
-const PROMISE_META_KEY = 'di:promise-meta';
-const LAZY_META_KEY = 'di:lazy-meta';
-
 export interface IClassInterface<T> {
   new (...params: any[]): T;
 }
 
-interface ITokenMeta {
-
-  index: number;
-  token: any;
-}
 
 // ANNOTATIONS
 
@@ -98,72 +92,21 @@ export interface IClassAnnotations {
 }
 
 /**
- * Returns annotation meta data of target if exists
- */
-function getAnnotations(target: any): Array<InjectDecorator|ProvideDecorator> {
-
-  return Reflect.getMetadata(ANNOTATIONS_META_KEY, target);
-}
-
-/**
- * Sets annotation meta data of specified target
- */
-function setAnnotations(target: any,
-                        annotations: Array<InjectDecorator|ProvideDecorator>): void {
-
-  Reflect.defineMetadata(ANNOTATIONS_META_KEY, annotations, target);
-}
-
-/**
- * Returns promise meta data from specified target
- */
-function getPromiseMeta(target: any): ITokenMeta[] {
-
-  return Reflect.getMetadata(PROMISE_META_KEY, target);
-}
-
-/**
- * Sets promise meta data of specified target
- */
-function setPromiseMeta(target: any,
-                        meta: ITokenMeta[]): void {
-
-  Reflect.defineMetadata(PROMISE_META_KEY, meta, target);
-}
-
-/**
- * Returns lazy meta data from specified target
- */
-function getLazyMeta(target: any): ITokenMeta[] {
-
-  return Reflect.getMetadata(LAZY_META_KEY, target);
-}
-
-/**
- * Sets lazy meta data of specified target
- */
-function setLazyMeta(target: any,
-                     meta: ITokenMeta[]): void {
-
-  Reflect.defineMetadata(LAZY_META_KEY, meta, target);
-}
-
-/**
  * Append annotation on a function or class.
  * This can be helpful when not using ES6+.
  */
 export function annotate(target: any,
-                         annotation: InjectDecorator | ProvideDecorator): void {
+                         ...annotations: Array<InjectDecorator | ProvideDecorator>): void {
 
-  let annotations = getAnnotations(target.prototype);
+  let _annotations = getAnnotations(target.prototype);
 
-  if (!annotations) {
+  if (!_annotations) {
 
-    annotations = [annotation];
-    setAnnotations(target.prototype, annotations);
+    _annotations = annotations;
+    setAnnotations(target.prototype, _annotations);
   } else {
 
-    annotations.unshift(annotation);
+    _annotations.unshift(...annotations);
   }
 }
 
@@ -248,36 +191,7 @@ export function readAnnotations(target: any): ICollectedAnnotation {
     }
   }
 
-  if (target.parameters)
-    target.parameters.forEach(readIndividualParams);
-
   return collectedAnnotations;
-
-  /**
-   * Read annotations for individual parameters.
-   */
-  function readIndividualParams(param: any, idx: number): any {
-
-    for (const paramAnnotation of param) {
-      // Type annotation.
-      if (isFunction(paramAnnotation) && !collectedAnnotations.params[idx]) {
-
-        collectedAnnotations.params[idx] = {
-          token: paramAnnotation,
-          isPromise: false,
-          isLazy: false
-        };
-
-      } else if (paramAnnotation instanceof InjectDecorator) {
-
-        collectedAnnotations.params[idx] = {
-          token: paramAnnotation.tokens[0],
-          isPromise: paramAnnotation.isPromise,
-          isLazy: paramAnnotation.isLazy
-        };
-      }
-    }
-  }
 }
 
 /**
@@ -285,25 +199,37 @@ export function readAnnotations(target: any): ICollectedAnnotation {
  */
 export function Inject(target: any): void {
 
-  let tokens: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
+  const tokens: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
   const promiseMeta = getPromiseMeta(target.prototype);
   const lazyMeta = getLazyMeta(target.prototype);
+  const factoryMeta = getFactoryMeta(target.prototype);
 
-  if (promiseMeta) {
-    const asPromiseTokens: any[] = promiseMeta.map(meta => meta.token);
-    tokens = tokens.filter((token, index) => !promiseMeta.find(meta => meta.index === index));
+  const annotations = tokens.map((token, index) => {
 
-    annotate(target, new InjectPromiseDecorator(...asPromiseTokens));
-  }
+    const advancedDecorator = [
+      [factoryMeta, InjectDecorator],
+      [promiseMeta, InjectPromiseDecorator],
+      [lazyMeta, InjectLazyDecorator],
+    ].reduce<any>((result, current: any) => {
 
-  if (lazyMeta) {
-    const asLazyTokens: any[] = lazyMeta.map(meta => meta.token);
-    tokens = tokens.filter((token, index) => !lazyMeta.find(meta => meta.index === index));
+      if (result) return result;
 
-    annotate(target, new InjectLazyDecorator(...asLazyTokens));
-  }
+      const [meta, decorator] = current;
 
-  annotate(target, new InjectDecorator(...tokens));
+      if (meta) {
+        const foundMeta = meta.find(_meta => _meta.index === index);
+
+        if (foundMeta) {
+          return new decorator(foundMeta.token);
+        }
+      }
+
+    }, void 0);
+
+    return advancedDecorator || new InjectDecorator(token);
+  });
+
+  annotate(target, ...annotations);
 }
 
 export function InjectPromise(...tokens: any[]): Function {
@@ -329,6 +255,7 @@ export function asPromise(token: IClassInterface<any>): Function {
     promiseMeta.push({index, token});
   };
 }
+
 export function asLazy(token: IClassInterface<any>): Function {
 
   return (target: any, key: string, index: number) => {
@@ -341,6 +268,26 @@ export function asLazy(token: IClassInterface<any>): Function {
     }
     lazyMeta.push({index, token});
   };
+}
+
+export function useFactory(token: Function): Function {
+
+  return (target: any, key: string, index: number) => {
+
+    markAsFactory(token);
+    let factoryMeta = getFactoryMeta(target.prototype);
+
+    if (!factoryMeta) {
+      factoryMeta = [];
+      setFactoryMeta(target.prototype, factoryMeta);
+    }
+    factoryMeta.push({index, token});
+  };
+}
+
+export function useToken(token: Function): Function {
+
+  return useFactory(token);
 }
 
 export function Provide(token: IClassInterface<any>): Function {

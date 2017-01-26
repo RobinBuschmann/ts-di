@@ -2,83 +2,97 @@
 
 ## Dependency Injection
 
-This is a fork of KostyaTretyak's [ts-di](https://github.com/KostyaTretyak/ts-di).
+di-typescript is a simple dependency injection framework, which is build upon 
+[ts-di](https://github.com/KostyaTretyak/ts-di) and 
+[angular/di.js](https://github.com/angular/di.js). 
 
-### Install
+## Install
 
-TODO
+```
+npm install di-typescript --save
+```
 
-## Examples resolve dependency
+## Usage
 
 Inject instance of class `A` for constructor of class `B`:
 
-### Using decorator
+### Using `@Inject` and create an instance
 
-```ts
-import {Inject} from 'ts-di';
+```typescript
+import {Inject, Injector} from 'di-typescript';
 
-class A{}
+class UserService{}
 
-// All dependencies in @Inject listed separated by commas
 @Inject
-class B
+class App
 {
-  constructor(private a: A){}
+  constructor(protected userService: UserService){}
 
-  getValue()
-  {
-    console.log(`There should be a instance of class A:`, this.a);
-  }
-}
-```
-
-### Using annotation a function
-
-```ts
-import {annotate, InjectDecorator} from 'ts-di';
-
-class A{}
-
-class B
-{
-  constructor(private a: A){}
-
-  getValue()
-  {
-    console.log(`There should be a instance of class A:`, this.a);
-  }
 }
 
-// All dependencies in InjectDecorator listed separated by commas
-annotate( B, new InjectDecorator(A) );
+const injector = new Injector();
+const app = injector.get(App); // resolves userService for us
+
 ```
 
-### Get instance
+### Using factories and tokens
 
-```ts
-import {Injector} from 'ts-di';
-import {B} from './path/to/class/B';
+```typescript
+import {Inject, createToken, useToken, useFactory} from 'di-typescript';
 
-let injector = new Injector();
+interface IStorage { /* ... */ }
+const storage: IStorage = { /* ... */ };
+const storageFactory = () => storage;
 
-// Instance class B and resolve dependency
-let instance = injector.get(B);
+interface IConfig { /* ... */ }
+const configToken = createToken('app.config');
+
+@Inject
+class App
+{
+  constructor(protected userService: UserService,
+              @useToken(configToken) protected config: IConfig,
+              @useFactory(storageFactory) protected storage: IStorage){}
+
+}
+
+const config: IConfig = { /* ... */ };
+const injector = new Injector([{provide: configToken, useValue: config}]);
+const app = injector.get(App);
+
 ```
 
-## Usage decorators
+### Testing and providing different values for specific tokens
 
-Now supports five decorators:
-- For resolving chain dependencies:
-  - `@Inject`
-    - `@asPromise`
-    - `@asLazy`
-  - `@InjectPromise`
-  - `@InjectLazy`
-- For resolving single dependency (useful for testing):
-  - `@Provide`
-  - `@ProvidePromise`
+```typescript
 
-## Compared to KostyaTretyak's ts-di 
-This version uses [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) to store the meta information
-provided by the decorators. Another benefit from reflect-metadata is, that `Inject` don't need parameters anymore - 
-It now retrieves the dependencies through the `design:paramtypes meta information.
+class UserService{}
+class UserServiceMock{}
+
+function storageMockFactory() {
+  /* ... */
+}
+
+@Inject
+class App
+{
+  constructor(protected userService: UserService,
+              @useFactory(storageFactory) protected storage: IStorage){}
+
+}
+
+const injector = new Injector([
+  {provide: UserService, useClass: UserServiceMock},
+  {provide: storageFactory, useFactory: storageMockFactory},
+]);
+const app = injector.get(App);
+```
+
+## Differences between di-typescript and angular/di.js
+Compared to [ts-di](https://github.com/KostyaTretyak/ts-di) and [angular/di.js](https://github.com/angular/di.js) 
+di-typescript uses [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) 
+to store the meta information. A benefit from using reflect-metadata is, that the`Inject` 
+decorator don't need parameters anymore. di-typescript retrieves these values
+through the `design:paramtypes` meta information provided by typescript instead. Another
+features are the `useFactory` annotation and the angular2-like 
+`{provide: SomeService, useClass/useValue/useFactory}` syntax when creating an injector.

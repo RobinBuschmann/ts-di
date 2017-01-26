@@ -3,14 +3,21 @@
     "target": "es2015",
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": "dist",
     "sourceMap": true,
+    "noUnusedLocals": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "removeComments": false,
     "strictNullChecks": true,
     "declaration": true
   },
+  "include": [
+    "lib/**/*",
+    "test/**/*"
+  ],
+  "files": [
+    "index.ts"
+  ],
   "exclude": [
     "node_modules",
     "dist"
