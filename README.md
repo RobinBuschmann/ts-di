@@ -11,6 +11,14 @@ di-typescript is a simple dependency injection framework, which is build upon
 npm install di-typescript --save
 ```
 
+
+## Configuration
+`tsconfig.json` file needs the following flags:
+```
+"experimentalDecorators": true,
+"emitDecoratorMetadata": true
+```
+
 ## Usage
 ### Using `@Inject` and create an instance
 The following shows how to inject an instance of `UserService` into the constructor of `App`.
