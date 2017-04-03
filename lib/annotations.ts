@@ -217,7 +217,7 @@ export function Inject(target: any): void {
       const [meta, decorator] = current;
 
       if (meta) {
-        const foundMeta = meta.find(_meta => _meta.index === index);
+        const foundMeta = meta.find((_meta: any) => _meta.index === index);
 
         if (foundMeta) {
           return new decorator(foundMeta.token);
