@@ -1,6 +1,13 @@
 // PUBLIC API
 
-export {Injector} from './lib/injector';
+export {
+  Injector,
+  IModule,
+  IValueModule,
+  IClassModule,
+  IFactoryModule,
+  Module
+} from './lib/injector';
 export {createToken} from './lib/opaqueToken';
 export {
   annotate,
