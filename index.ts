@@ -2,7 +2,6 @@
 
 export {
   Injector,
-  IModule,
   IValueModule,
   IClassModule,
   IFactoryModule,
