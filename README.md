@@ -1,3 +1,8 @@
+# ⚠️ THIS PACKAGE IS DEPRECATED
+Please use https://github.com/mgechev/injection-js instead
+
+
+
 [![Build Status](https://travis-ci.org/RobinBuschmann/ts-di.png?branch=master)](https://travis-ci.org/RobinBuschmann/ts-di)
 
 ## Dependency Injection
